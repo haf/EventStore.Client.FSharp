@@ -1,0 +1,32 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{FE0AF229-9674-4EB0-98BA-2991BFEA48FD}"
+	ProjectSection(SolutionItems) = preProject
+		..\paket.dependencies = ..\paket.dependencies
+		..\paket.lock = ..\paket.lock
+	EndProjectSection
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "EventStore.ClientAPI.FSharp", "EventStore.ClientAPI.FSharp\EventStore.ClientAPI.FSharp.fsproj", "{AFF2ACA3-0084-4A40-96F9-F0886601A925}"
+EndProject
+Project("{f2a71f9b-5d33-465a-a702-920d77279786}") = "EventStore.ClientAPI.FSharp.Tests", "EventStore.ClientAPI.FSharp.Tests\EventStore.ClientAPI.FSharp.Tests.fsproj", "{E9AF9A62-C894-40BD-99A8-FD6CD0148588}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AFF2ACA3-0084-4A40-96F9-F0886601A925}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFF2ACA3-0084-4A40-96F9-F0886601A925}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFF2ACA3-0084-4A40-96F9-F0886601A925}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFF2ACA3-0084-4A40-96F9-F0886601A925}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9AF9A62-C894-40BD-99A8-FD6CD0148588}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9AF9A62-C894-40BD-99A8-FD6CD0148588}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9AF9A62-C894-40BD-99A8-FD6CD0148588}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9AF9A62-C894-40BD-99A8-FD6CD0148588}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = EventStore.ClientAPI.FSharp\EventStore.ClientAPI.FSharp.fsproj
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E9AF9A62-C894-40BD-99A8-FD6CD0148588}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>EventStore.ClientAPI.FSharp.Tests</RootNamespace>
+    <AssemblyName>EventStore.ClientAPI.FSharp.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Name>EventStore.ClientAPI.FSharp.Tests</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Debug\EventStore.ClientAPI.FSharp.Tests.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <DocumentationFile>bin\Release\EventStore.ClientAPI.FSharp.Tests.XML</DocumentationFile>
+  </PropertyGroup>
+  <Choose>
+    <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
+      <Choose>
+        <When Condition="$(TargetFrameworkVersion) == 'v1.0'">
+          <ItemGroup>
+            <Reference Include="Fuchu">
+              <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+          </ItemGroup>
+        </When>
+        <When Condition="$(TargetFrameworkVersion) == 'v1.1'">
+          <ItemGroup>
+            <Reference Include="Fuchu">
+              <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+          </ItemGroup>
+        </When>
+        <When Condition="$(TargetFrameworkVersion) == 'v2.0'">
+          <ItemGroup>
+            <Reference Include="Fuchu">
+              <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+          </ItemGroup>
+        </When>
+        <When Condition="$(TargetFrameworkVersion) == 'v3.5'">
+          <ItemGroup>
+            <Reference Include="Fuchu">
+              <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+          </ItemGroup>
+        </When>
+        <Otherwise>
+          <ItemGroup>
+            <Reference Include="EventStore.ClientAPI">
+              <HintPath>..\..\packages\EventStore.Client\lib\net40\EventStore.ClientAPI.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Fuchu">
+              <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+          </ItemGroup>
+        </Otherwise>
+      </Choose>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'MonoAndroid'">
+      <ItemGroup>
+        <Reference Include="EventStore.ClientAPI">
+          <HintPath>..\..\packages\EventStore.Client\lib\net40\EventStore.ClientAPI.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Fuchu">
+          <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'MonoTouch'">
+      <ItemGroup>
+        <Reference Include="EventStore.ClientAPI">
+          <HintPath>..\..\packages\EventStore.Client\lib\net40\EventStore.ClientAPI.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Fuchu">
+          <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'Silverlight'">
+      <ItemGroup>
+        <Reference Include="EventStore.ClientAPI">
+          <HintPath>..\..\packages\EventStore.Client\lib\net40\EventStore.ClientAPI.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Fuchu">
+          <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'Windows'">
+      <ItemGroup>
+        <Reference Include="EventStore.ClientAPI">
+          <HintPath>..\..\packages\EventStore.Client\lib\net40\EventStore.ClientAPI.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Fuchu">
+          <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(TargetFrameworkIdentifier) == 'WindowsPhoneApp'">
+      <ItemGroup>
+        <Reference Include="EventStore.ClientAPI">
+          <HintPath>..\..\packages\EventStore.Client\lib\net40\EventStore.ClientAPI.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Fuchu">
+          <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Reference Include="EventStore.ClientAPI">
+          <HintPath>..\..\packages\EventStore.Client\lib\net40\EventStore.ClientAPI.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Fuchu">
+          <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="FSharp.Core">
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApiTests.fs" />
+    <Compile Include="Program.fs" />
+    <None Include="Script.fsx" />
+    <None Include="paket.references" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EventStore.ClientAPI.FSharp\EventStore.ClientAPI.FSharp.fsproj">
+      <Name>EventStore.ClientAPI.FSharp</Name>
+      <Project>{AFF2ACA3-0084-4A40-96F9-F0886601A925}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -181,6 +181,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiTests.fs" />
+    <Compile Include="AssemblyVersionInfo.fs">
+    </Compile>
     <Compile Include="Program.fs" />
     <None Include="Script.fsx" />
     <None Include="paket.references" />

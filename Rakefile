@@ -41,7 +41,7 @@ task :restore => :paket_bootstrap do
 end
 
 desc 'Perform full build'
-build :compile => [:versioning, :restore] do |b|
+build :compile => [:versioning, :restore, :assembly_info] do |b|
   b.sln = 'src/EventStore.Client.FSharp.sln'
 end
 
@@ -64,7 +64,21 @@ nugets_pack :create_nugets => ['build/pkg', :versioning, :compile] do |p|
   end
 end
 
-task :default => :create_nugets
+namespace :tests do
+  task :unit_quick do
+    system 'src/EventStore.ClientAPI.FSharp.Tests/bin/Debug/EventStore.ClientAPI.FSharp.Tests.exe',
+           clr_command: true
+  end
+
+  desc 'run all unit tests'
+  task :unit => [:compile, :unit_quick]
+end
+
+desc 'run all tests'
+task :tests => :'tests:unit'
+
+desc 'run tests and create nuget'
+task :default => [:tests, :create_nugets]
 
 task :ensure_nuget_key do
   raise 'missing env NUGET_KEY value' unless ENV['NUGET_KEY']

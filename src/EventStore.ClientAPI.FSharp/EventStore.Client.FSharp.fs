@@ -459,7 +459,7 @@ module Types =
     static member ResolvedEvents = [||]
 
   // EVENT DATA
-  
+
   let private emptyEventData = EventData(Guid.Empty, "", true, Empty.ByteArray, Empty.ByteArray)
 
   type EventStore.ClientAPI.EventData with
@@ -467,11 +467,11 @@ module Types =
 
   /// <see cref="EventStore.ClientAPI.EventData" />
   type EventData =
-    { Id            : System.Guid
-      Type          : string
-      Metadata      : byte array
-      Data          : byte array
-      IsJson        : bool }
+    { Id       : System.Guid
+      Type     : string
+      Metadata : byte array
+      Data     : byte array
+      IsJson   : bool }
 
   let unwrapEventData (e : EventData) =
     EventStore.ClientAPI.EventData(e.Id, e.Type, e.IsJson, e.Data, e.Metadata)
@@ -487,7 +487,7 @@ module Types =
     static member Empty = EventStore.ClientAPI.EventData.Empty |> wrapEventData
 
   // RECORDED EVENT
-  
+
   let private ctorRecordedEvent, private setterRecE = reflPkgFor<EventStore.ClientAPI.RecordedEvent> ()
 
   let private newRecordedEvent (eventId : Guid) (streamId : string) (evtType : string) (number : int) (data : byte array) (metaData : byte array) =

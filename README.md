@@ -9,7 +9,10 @@ that accompanies the assembly.
 
 ## API
 
-Usage `open EventStore.Client`.
+Usage `open EventStore.Client`. If using `Repo` and `Aggregate`, you should use
+the nuget `Intelliplan.JsonNet` to get access to `Serialisation.serialise` and
+`Serialisation.deserialise`, which are the two serialisation functions that work
+well.
 
 ### Global in `EventStore.Client` namespace
 
@@ -62,7 +65,7 @@ Anyone is welcome to answer.
 
  - [ ] API-parity with v3.0
  - [ ] Snapshot helpers for Aggregates
- - [ ] Fix depdencies for nuget:
+ - [x] Fix depdencies for nuget:
    * FSharp.Core.3
    * Newtonsoft.Json
    * EventStore.Client

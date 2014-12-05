@@ -186,6 +186,7 @@
     <Compile Include="Program.fs" />
     <None Include="Script.fsx" />
     <None Include="paket.references" />
+    <Compile Include="ReadModelTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EventStore.ClientAPI.FSharp\EventStore.ClientAPI.FSharp.fsproj">

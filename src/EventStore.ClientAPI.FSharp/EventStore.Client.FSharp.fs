@@ -37,6 +37,30 @@ type ResolveLinksStrategy =
   | ResolveLinks
   | DontResolveLinks
 
+module AsyncHelpers =
+
+  open System
+  open System.Threading.Tasks
+
+  type Microsoft.FSharp.Control.Async with
+    static member Raise (e : #exn) =
+      Async.FromContinuations(fun (_,econt,_) -> econt e)
+
+  let awaitTask (t : System.Threading.Tasks.Task) =
+    let flattenExns (e : AggregateException) = e.Flatten().InnerExceptions |> Seq.nth 0
+    let rewrapAsyncExn (it : Async<unit>) =
+      async { try do! it with :? AggregateException as ae -> do! (Async.Raise <| flattenExns ae) }
+    let tcs = new TaskCompletionSource<unit>(TaskCreationOptions.None)
+    t.ContinueWith((fun t' ->
+      if t.IsFaulted then tcs.SetException(t.Exception |> flattenExns)
+      elif t.IsCanceled then tcs.SetCanceled ()
+      else tcs.SetResult(())), TaskContinuationOptions.ExecuteSynchronously)
+    |> ignore
+    tcs.Task |> Async.AwaitTask |> rewrapAsyncExn
+
+  type Microsoft.FSharp.Control.Async with
+    static member AwaitTask t = awaitTask t
+
 module internal Helpers =
 
   let validUint (b : uint32) =
@@ -67,23 +91,6 @@ module internal Helpers =
     | DontResolveLinks -> false
 
   open System
-  open System.Threading.Tasks
-
-  type Microsoft.FSharp.Control.Async with
-    static member Raise (e : #exn) =
-      Async.FromContinuations(fun (_,econt,_) -> econt e)
-
-  let awaitTask (t : System.Threading.Tasks.Task) =
-    let flattenExns (e : AggregateException) = e.Flatten().InnerExceptions |> Seq.nth 0
-    let rewrapAsyncExn (it : Async<unit>) =
-      async { try do! it with :? AggregateException as ae -> do! (Async.Raise <| flattenExns ae) }
-    let tcs = new TaskCompletionSource<unit>(TaskCreationOptions.None)
-    t.ContinueWith((fun t' ->
-      if t.IsFaulted then tcs.SetException(t.Exception |> flattenExns)
-      elif t.IsCanceled then tcs.SetCanceled ()
-      else tcs.SetResult(())), TaskContinuationOptions.ExecuteSynchronously)
-    |> ignore
-    tcs.Task |> Async.AwaitTask |> rewrapAsyncExn
 
   open EventStore.ClientAPI.Exceptions
 
@@ -339,6 +346,7 @@ type Connection =
 module TypeExtensions =
 
   open Helpers
+  open AsyncHelpers
 
   type EventStore.ClientAPI.IEventStoreConnection with
     /// Convert the connection to be usable with the F# API (an interface
@@ -778,6 +786,7 @@ module Types =
 module Conn =
 
   open Helpers
+  open AsyncHelpers
 
   // BUILDING CONNECTION
 
@@ -953,6 +962,7 @@ module Conn =
 module Tx =
 
   open Helpers
+  open AsyncHelpers
   open EventStore.ClientAPI
   open Conn
 

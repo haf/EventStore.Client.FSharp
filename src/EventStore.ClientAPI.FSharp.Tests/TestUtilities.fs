@@ -24,6 +24,8 @@ let with_embedded_es f =
     printfn "stopping embedded EventStore"
     node.Stop()
     printfn "stopped embedded EventStore"
+
+let with_real_es f = f ()
     
 let with_connection factory f =
   factory <| fun _ ->

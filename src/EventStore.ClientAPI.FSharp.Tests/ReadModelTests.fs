@@ -39,9 +39,11 @@ let roundtrip_tests =
   let timeout = TimeSpan.FromSeconds 8.
   let default_creds = UserCredentials ("admin", "changeit")
 
+  let eventstore_impl = with_real_es
+
   testList "read your writes" [
     testCase "can add read model" <| fun _ ->
-      with_embedded_es <| fun _ ->
+      eventstore_impl <| fun _ ->
         let pm = ProjectionsManager(logger, ep, timeout)
 
         wait_until_no_exn <| fun _ ->
@@ -51,7 +53,7 @@ let roundtrip_tests =
         |> run_t
 
     testCase "can execute commands against AR" <| fun _ ->
-      with_connection' <| fun conn ->
+      with_connection eventstore_impl <| fun conn ->
         let evts =
           CodeLikeHell
           |> LifeOfAProgrammer.write conn "programmer-1" NoStream
@@ -79,7 +81,7 @@ let roundtrip_tests =
         |> Async.RunSynchronously
         |> ignore
 
-      with_connection' <| fun conn ->
+      with_connection eventstore_impl <| fun conn ->
         let pm = ensure_projections ()
         write_code_command conn
         let state = pm.GetStateAsync("EventCounting", default_creds) |> Async.AwaitTask |> Async.RunSynchronously

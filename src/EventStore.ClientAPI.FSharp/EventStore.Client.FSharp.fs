@@ -1048,9 +1048,138 @@ module Events =
       ; Data     = Encoding.UTF8.GetBytes json
       ; IsJson   = true }
 
+
+type ProjectionsCtx =
+  { logger  : ILogger
+    ep      : IPEndPoint
+    timeout : TimeSpan
+    creds   : SystemData.UserCredentials }
+
 module Projections =
+
+  open Helpers
+  open AsyncHelpers
+
+  open EventStore.ClientAPI
+  open EventStore.ClientAPI.Exceptions
+
+  open FSharp.Data
+
   [<Literal>]
   let Description = "A module that encapsulates read patterns against the event store"
+
+  let private ``404 is just fine`` f =
+    async {
+      try
+        return! f ()
+      with 
+      | :? ProjectionCommandFailedException as e
+          when e.Message.Contains("404 (Not Found)") ->
+        return ()
+    }
+
+  let private mk_manager ctx =
+    ProjectionsManager(ctx.logger, ctx.ep, ctx.timeout)
+
+  let abort ctx name =
+    let pm = mk_manager ctx
+    pm.AbortAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let enable ctx name =
+    let pm = mk_manager ctx
+    pm.EnableAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let create_continuous ctx name query =
+    let pm = mk_manager ctx
+    pm.CreateContinuousAsync(name, query, ctx.creds) |> Async.AwaitTask
+
+  let create_one_time ctx query =
+    let pm = mk_manager ctx
+    pm.CreateOneTimeAsync(query, ctx.creds) |> Async.AwaitTask
+
+  let create_transient ctx name query =
+    let pm = mk_manager ctx
+    pm.CreateTransientAsync(name, query, ctx.creds) |> Async.AwaitTask
+
+  let delete ctx name =
+    let pm = mk_manager ctx
+    pm.DeleteAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let disable ctx name =
+    let pm = mk_manager ctx
+    ``404 is just fine`` <| fun _ ->
+      pm.DisableAsync(name, ctx.creds)
+      |> Async.AwaitTask
+
+  let get_query ctx name =
+    let pm = mk_manager ctx
+    pm.GetQueryAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let get_state ctx name =
+    // see https://github.com/fsharp/FSharp.Data/issues/756
+//    let State = JsonProvider<"get_state_sample.json">
+//    let pm = mk_manager ctx
+//    async {
+//      let! res = pm.GetStateAsync(name, ctx.creds) |> Async.AwaitTask
+//      return State.Parse res
+//    }
+    let pm = mk_manager ctx
+    pm.GetStateAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let get_statistics ctx name =
+    let pm = mk_manager ctx
+    pm.GetStatisticsAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let get_status ctx name =
+    let pm = mk_manager ctx
+    pm.GetStatusAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let list_all ctx =
+    let pm = mk_manager ctx
+    pm.ListAllAsync ctx.creds |> Async.AwaitTask
+
+  let list_continuous ctx =
+    let pm = mk_manager ctx
+    pm.ListContinuousAsync ctx.creds |> Async.AwaitTask
+
+  let list_one_time ctx =
+    let pm = mk_manager ctx
+    pm.ListOneTimeAsync ctx.creds |> Async.AwaitTask
+
+  let update_query ctx name query =
+    let pm = mk_manager ctx
+    pm.UpdateQueryAsync(name, query, ctx.creds) |> Async.AwaitTask
+
+  let setup_aggregate_projections ctx  =
+    let streams = [ "$by_category"; "$stream_by_category" ]
+    async {
+      for stream in streams do
+        let! state = stream |> get_status ctx
+        if state.Contains "Running" then () else
+          printfn "projection '%s' in state '%s', enabling now"  stream state
+          do! stream |> enable ctx
+    }
+
+  let rec wait_for_init ctx (f : ProjectionsManager -> _ Async) = async {
+    let pm = mk_manager ctx
+    try
+      do! setup_aggregate_projections ctx
+      return! f pm
+    with
+    | :? ProjectionCommandFailedException as e
+        when e.Message.Contains("Not yet ready.") ->
+      ctx.logger.Info "... waiting for server to get ready ..."
+      do! Async.Sleep 1000
+      return! wait_for_init ctx f
+    }
+
+  let ensure_continuous ctx name query =
+    let pm = mk_manager ctx
+    async {
+      let! status = get_status ctx name
+      if not (status.Contains "Running") then
+        do! create_continuous ctx name query
+    }
 
 module Write =
   [<Literal>]

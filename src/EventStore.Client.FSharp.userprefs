@@ -1,12 +1,11 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="EventStore.ClientAPI.FSharp.Tests/SampleDomain.fs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="EventStore.ClientAPI.FSharp/EventStore.Client.FSharp.fs">
     <Files>
-      <File FileName="EventStore.ClientAPI.FSharp.Tests/ReadModelTests.fs" Line="1" Column="1" />
-      <File FileName="EventStore.ClientAPI.FSharp.Tests/TestUtilities.fs" Line="1" Column="1" />
-      <File FileName="EventStore.ClientAPI.FSharp.Tests/SampleDomain.fs" Line="17" Column="17" />
-      <File FileName="EventStore.ClientAPI.FSharp/EventStore.Client.FSharp.fs" Line="23" Column="23" NotebookId="1" />
-      <File FileName="EventStore.ClientAPI.FSharp.Tests/OscillatoryFeelings.js" Line="1" Column="1" NotebookId="1" />
+      <File FileName="EventStore.ClientAPI.FSharp.Tests/TestUtilities.fs" Line="14" Column="14" />
+      <File FileName="EventStore.ClientAPI.FSharp.Tests/ProjectionsTests.fs" Line="24" Column="24" />
+      <File FileName="EventStore.ClientAPI.FSharp.Tests/Program.fs" Line="31" Column="31" />
+      <File FileName="EventStore.ClientAPI.FSharp/EventStore.Client.FSharp.fs" Line="1" Column="1" NotebookId="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

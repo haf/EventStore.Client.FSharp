@@ -797,15 +797,15 @@
   <ItemGroup>
     <Compile Include="AssemblyVersionInfo.fs">
     </Compile>
-    <EmbeddedResource Include="IsHeAManagerYet.js" />
     <Compile Include="TestUtilities.fs" />
-    <Compile Include="ApiTests.fs" />
     <Compile Include="SampleDomain.fs" />
-    <Compile Include="ReadModelTests.fs" />
+    <EmbeddedResource Include="IsHeAManagerYet.js" />
+    <EmbeddedResource Include="EventCounting.js" />
+    <Compile Include="ProjectionsTests.fs" />
+    <Compile Include="ApiTests.fs" />
     <Compile Include="Program.fs" />
     <None Include="Script.fsx" />
     <None Include="paket.references" />
-    <EmbeddedResource Include="EventCounting.js" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EventStore.ClientAPI.FSharp\EventStore.ClientAPI.FSharp.fsproj">

@@ -2,11 +2,14 @@
   .when({
     $init: function() {
       return {
-        seen: 0
       }
     },
     "$any": function (state, event) {
-      state.seen += 1;
+      if (typeof state[event.streamId] === undefined
+          || state[event.streamId] == null) {
+        state[event.streamId] = [];
+      };
+      state[event.streamId][event.sequenceNumber] = event.data._name;
       return state;
     }
   })

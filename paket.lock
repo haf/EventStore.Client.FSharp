@@ -5,6 +5,8 @@ NUGET
     EventStore.Client.Embedded (3.0.1)
       EventStore.Client (>= 3.0.1)
     FSharp.Core.3 (0.0.2)
+    FSharp.Data (2.1.0)
+      Zlib.Portable (>= 1.10.0) - portable-7.0
     FSharpx.Core (1.8.41)
     Fuchu (0.4.0.0)
     Intelliplan.JsonNet (2.0.0)
@@ -13,3 +15,4 @@ NUGET
     Newtonsoft.Json (6.0.6)
     NuGet.CommandLine (2.8.3)
     protobuf-net (2.0.0.668)
+    Zlib.Portable (1.10.0) - portable-7.0

@@ -1,5 +1,4 @@
-﻿fromCategory('programmers')
-  .foreachStream()
+﻿fromAll()
   .when({
     $init: function() {
       return {

@@ -4,7 +4,7 @@ namespace EventStore.ClientAPI
 
 /// The specific event version to read as detailed on ReadEventAsync
 type EventVersion =
-  | Specific of uint32
+  | SpecificEvent of uint32
   /// -1 - read the last written event
   | LastInStream
 
@@ -75,8 +75,8 @@ module internal Helpers =
   open EventStore.ClientAPI
 
   let (|EventVersion|) = function
-    | EventVersion.Specific i -> int i
-    | LastInStream            -> -1
+    | SpecificEvent i -> int i
+    | LastInStream    -> -1
 
   /// (Active-) pattern match out the GetEventStore integer value denoting each
   /// of the cases in the discriminated union ExpectedVersionUnion.
@@ -1048,7 +1048,7 @@ module Events =
       ; Data     = Encoding.UTF8.GetBytes json
       ; IsJson   = true }
 
-module Read =
+module Projections =
   [<Literal>]
   let Description = "A module that encapsulates read patterns against the event store"
 

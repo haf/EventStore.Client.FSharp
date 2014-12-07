@@ -1,8 +1,5 @@
-EventStore.Client
 Fuchu
 protobuf-net
 EventStore.Client.Embedded
 Intelliplan.JsonNet
-FSharp.Core.3
 FSharpx.Core
-Newtonsoft.Json

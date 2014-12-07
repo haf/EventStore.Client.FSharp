@@ -15,18 +15,21 @@ open EventStore.ClientAPI.SystemData
 open EventStore.ClientAPI.Common.Log
 
 let file name =
-  let assembly = Assembly.GetExecutingAssembly()
+  let assembly = Assembly.GetExecutingAssembly ()
   let rname = sprintf "EventStore.ClientAPI.FSharp.Tests.%s" name
   use stream = assembly.GetManifestResourceStream rname
-  use reader = new StreamReader(stream)
-  reader.ReadToEnd ()
+  if stream = null then
+    failwithf "couldn't find resource named '%s'" rname
+  else
+    use reader = new StreamReader(stream)
+    reader.ReadToEnd ()
 
 [<Tests>]
 let tests =
-  let ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 2113)
+  let ep = new IPEndPoint(IPAddress.Loopback, 2113)
   let logger = ConsoleLogger()
   let timeout = TimeSpan.FromSeconds 8.
-  let default_creds = UserCredentials("admin", "changeit")
+  let default_creds = UserCredentials ("admin", "changeit")
 
   testList "read your writes" [
     testCase "can add read model" <| fun _ ->

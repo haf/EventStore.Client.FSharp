@@ -16,9 +16,9 @@ type Evt =
   | LostAWeekFromSegfault
 
 let exec state = function
-  | CodeLikeHell -> [ LostAnHourInVimVersusEmacsWar; MetAYakAndShavedIt ]
+  | CodeLikeHell   -> [ LostAnHourInVimVersusEmacsWar; MetAYakAndShavedIt ]
   | AvoidCodeSmell -> [ ReceivedUniversalAcclaim ]
-  | PublishNuget -> [ GotBrokenPR; ReceivedHateOnMailingList ]
+  | PublishNuget   -> [ GotBrokenPR; ReceivedHateOnMailingList ]
 
 type CoderState =
   | HappyAndFulfilled

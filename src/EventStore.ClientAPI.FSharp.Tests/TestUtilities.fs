@@ -5,7 +5,11 @@ open System.Net
 open System.IO
 open System.Threading
 
+open Fuchu
+
 open EventStore.Core
+open EventStore.Core.Messages
+open EventStore.Core.Bus
 open EventStore.ClientAPI
 open EventStore.ClientAPI.Embedded
 
@@ -14,25 +18,26 @@ let with_embedded_es f =
   let node = EmbeddedVNodeBuilder.AsSingleNode()
                                   .OnDefaultEndpoints()
                                   .RunInMemory()
+
                                   .RunProjections(ProjectionsMode.All)
                                   .WithWorkerThreads(16)
                                   .Build()
-  use are = new AutoResetEvent(false)
-  use sub =
-    node.NodeStatusChanged.Subscribe(fun args ->
-      args.NewVNodeState
-      |> function
-         | Data.VNodeState.Shutdown -> are.Set() |> ignore
-         | _                        -> ())
+
   try
     printfn "starting embedded EventStore"
     node.Start()
     f()
   finally
     printfn "stopping embedded EventStore"
+    use stopped = new AutoResetEvent(false)
+    node.MainBus.Subscribe(
+      new AdHocHandler<SystemMessage.BecomeShutdown>(
+        fun m -> stopped.Set() |> ignore))
     node.Stop()
-    are.WaitOne() |> ignore
-    printfn "stopped embedded EventStore"
+    if not (stopped.WaitOne(20000)) then
+      Tests.failtest "couldn't stop ES within 20000 ms"
+    else
+      printfn "stopped embedded EventStore"
 
 let with_real_es f = f ()
     

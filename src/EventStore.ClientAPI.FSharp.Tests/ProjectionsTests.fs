@@ -46,23 +46,23 @@ let roundtrip_tests =
           }
         |> Async.RunSynchronously
 
-//    testCase "cmds: can execute against Aggregate" <| fun _ ->
-//      with_connection eventstore_impl <| fun conn ->
-//        "programmers-1" |> Projections.delete proj_ctx |> Async.RunSynchronously
-//        let evts =
-//          CodeLikeHell
-//          |> LifeOfAProgrammer.write conn "programmers-1" NoStream
-//          |> Async.RunSynchronously
-//
-//        match evts with
-//        | [_; MetAYakAndShavedIt] -> ()
-//        | es -> Tests.failtest "got %A, expected hairy Yak" es
-//
-//        let _ =
-//          PublishNuget
-//          |> LifeOfAProgrammer.write conn "programmers-1" (Specific 2u)
-//          |> Async.RunSynchronously
-//        ()
+    testCase "cmds: can execute against Aggregate" <| fun _ ->
+      with_connection eventstore_impl <| fun conn ->
+        "programmers-1" |> Projections.delete proj_ctx |> Async.RunSynchronously
+        let evts =
+          CodeLikeHell
+          |> LifeOfAProgrammer.write conn "programmers-1" NoStream
+          |> Async.RunSynchronously
+
+        match evts with
+        | [_; MetAYakAndShavedIt] -> ()
+        | es -> Tests.failtest "got %A, expected hairy Yak" es
+
+        let _ =
+          PublishNuget
+          |> LifeOfAProgrammer.write conn "programmers-1" (Specific 2u)
+          |> Async.RunSynchronously
+        ()
 //
 //    testCase "projections: init/update/ensure" <| fun _ ->
 //      let ensure_projections () =

@@ -13,6 +13,7 @@ NUGET
       FSharp.Core.3 (>= 0.0.2)
       Newtonsoft.Json (>= 6.0.5)
     Newtonsoft.Json (6.0.6)
+    NLog (3.1.0.0)
     NuGet.CommandLine (2.8.3)
     protobuf-net (2.0.0.668)
     Zlib.Portable (1.10.0) - portable-7.0

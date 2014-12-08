@@ -13,12 +13,25 @@ open EventStore.Core.Bus
 open EventStore.ClientAPI
 open EventStore.ClientAPI.Embedded
 
+open NLog
+open NLog.Config
+open NLog.Targets
+
+let conf_nlog () =
+  let config = match LogManager.Configuration with | null -> new LoggingConfiguration () | cfg -> cfg
+  use ct = new ConsoleTarget()
+  config.AddTarget("console", ct)
+  let rule = new LoggingRule("*", LogLevel.Trace, ct)
+  config.LoggingRules.Add rule
+
+  LogManager.Configuration <- config
+
 /// Execute f in a context where you can bind to the event store
 let with_embedded_es f =
+  conf_nlog ()
   let node = EmbeddedVNodeBuilder.AsSingleNode()
                                   .OnDefaultEndpoints()
                                   .RunInMemory()
-
                                   .RunProjections(ProjectionsMode.All)
                                   .WithWorkerThreads(16)
                                   .Build()

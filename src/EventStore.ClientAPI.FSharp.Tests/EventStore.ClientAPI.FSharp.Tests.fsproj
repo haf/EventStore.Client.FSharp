@@ -92,6 +92,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\net35\NLog.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net35\Newtonsoft.Json.dll</HintPath>
               <Private>True</Private>
@@ -138,6 +143,11 @@
             </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\net40\NLog.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -190,6 +200,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\net40\NLog.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net40\Newtonsoft.Json.dll</HintPath>
               <Private>True</Private>
@@ -236,6 +251,11 @@
             </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\net45\NLog.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -336,6 +356,11 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="NLog">
+          <HintPath>..\..\packages\NLog\lib\net45\NLog.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="Newtonsoft.Json">
           <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
           <Private>True</Private>
@@ -382,6 +407,11 @@
         </Reference>
         <Reference Include="Intelliplan.JsonNet">
           <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="NLog">
+          <HintPath>..\..\packages\NLog\lib\net45\NLog.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -436,6 +466,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\net45\NLog.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
               <Private>True</Private>
@@ -477,6 +512,11 @@
             </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\sl4\NLog.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -529,6 +569,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\sl5\NLog.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
               <Private>True</Private>
@@ -572,6 +617,11 @@
         </Reference>
         <Reference Include="Intelliplan.JsonNet">
           <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="NLog">
+          <HintPath>..\..\packages\NLog\lib\net45\NLog.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -626,6 +676,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\net45\NLog.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
               <Private>True</Private>
@@ -672,6 +727,11 @@
             </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\net45\NLog.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -724,6 +784,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="NLog">
+              <HintPath>..\..\packages\NLog\lib\net45\NLog.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
               <Private>True</Private>
@@ -772,6 +837,11 @@
         </Reference>
         <Reference Include="Intelliplan.JsonNet">
           <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="NLog">
+          <HintPath>..\..\packages\NLog\lib\net45\NLog.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>

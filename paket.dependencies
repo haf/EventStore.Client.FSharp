@@ -7,3 +7,4 @@ nuget EventStore.Client.Embedded 3.0.1
 nuget Intelliplan.JsonNet 2.0.0
 nuget protobuf-net 2.0.0.668
 nuget FSharp.Data
+nuget nlog

@@ -1139,23 +1139,31 @@ module Projections =
     pm.GetQueryAsync(name, ctx.creds) |> Async.AwaitTask
 
   let get_state ctx name =
-    // see https://github.com/fsharp/FSharp.Data/issues/756
-//    let State = JsonProvider<"get_state_sample.json">
-//    let pm = mk_manager ctx
-//    async {
-//      let! res = pm.GetStateAsync(name, ctx.creds) |> Async.AwaitTask
-//      return State.Parse res
-//    }
     let pm = mk_manager ctx
-    pm.GetStateAsync(name, ctx.creds) |> Async.AwaitTask |> handle_http_codes ctx.logger
+    pm.GetStateAsync(name, ctx.creds)
+    |> Async.AwaitTask
+    |> handle_http_codes ctx.logger
 
   let get_statistics ctx name =
     let pm = mk_manager ctx
     pm.GetStatisticsAsync(name, ctx.creds) |> Async.AwaitTask
 
+  // reflection error with following line:
+  type Status = JsonProvider<"get_status_sample.json">
+//  type Status =
+//    { Status : string }
+//    static member Parse (str : string) =
+//      { Status = "Stopped" }
+
   let get_status ctx name =
     let pm = mk_manager ctx
-    pm.GetStatusAsync(name, ctx.creds) |> Async.AwaitTask |> handle_http_codes ctx.logger
+    async {
+      let! res =
+        pm.GetStatusAsync(name, ctx.creds)
+        |> Async.AwaitTask
+        |> handle_http_codes ctx.logger
+      return res |> Option.map Status.Parse
+    }
 
   let list_all ctx =
     let pm = mk_manager ctx
@@ -1177,12 +1185,12 @@ module Projections =
     let streams = [ "$by_category"; "$stream_by_category" ]
     async {
       for stream in streams do
-        let! state = stream |> get_status ctx
-        match state with
+        let! status = stream |> get_status ctx
+        match status with
         | None ->
           do! stream |> enable ctx
-        | Some state when not (state.Contains "Running") ->
-          ctx.logger.Debug (sprintf "projection '%s' in state '%s', enabling now"  stream state)
+        | Some status when status.Status <> "Running" ->
+          ctx.logger.Debug (sprintf "projection '%s' in status '%A', enabling now"  stream status)
           do! stream |> enable ctx
         | _ -> return ()
     }
@@ -1200,7 +1208,7 @@ module Projections =
       return! on_error ctx f orig_err (ae.InnerException)
     | :? ProjectionCommandFailedException as e
         when e.Message.Contains("Not yet ready.") ->
-      ctx.logger.Info "... waiting for server to get ready ..."
+      ctx.logger.Info "... waiting 1000 ms for server to get ready ..."
       do! Async.Sleep 1000
       return! wait_for_init ctx f
     | e when e.InnerException <> null ->
@@ -1218,7 +1226,7 @@ module Projections =
       | None -> 
         ctx.logger.Debug "calling create_continuous from 404 case"
         do! create_continuous ctx name query
-      | Some status when not (status.Contains "Running") ->
+      | Some status when status.Status <> "Running" ->
         ctx.logger.Debug "calling create_continuous from not Running case"
         do! create_continuous ctx name query
       | other ->

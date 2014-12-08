@@ -569,7 +569,7 @@
     <None Include="paket.references" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="AssemblyVersionInfo.fs" />
-    <None Include="get_state_sample.json" />
+    <None Include="get_status_sample.json" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

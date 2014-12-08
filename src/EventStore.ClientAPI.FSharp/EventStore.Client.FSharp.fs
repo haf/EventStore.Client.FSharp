@@ -1081,16 +1081,28 @@ module Projections =
   let private mk_manager ctx =
     ProjectionsManager(ctx.logger, ctx.ep, ctx.timeout)
 
-  let private handle_http_codes v =
+  let rec private handle_http_codes (logger : ILogger) v =
     async {
       try
         let! status = v
         return Some status
-      with
+      with e -> return! on_http_error logger v e e
+    }
+  and on_http_error logger v orig_ex (ex : exn) =
+    async {
+      match ex with
       | :? ProjectionCommandFailedException as pcfe
           when pcfe.Message.Contains "404 (Not Found)" ->
         return None
+      | :? AggregateException as ae ->
+        return! on_http_error logger v orig_ex (ae.InnerException)
+      | :? WebException as we when we.Message.Contains "Aborted" ->
+        return! handle_http_codes logger v
+      | e ->
+        logger.Error (sprintf "unhandled exception from handle_http_codes:\n%O" e)
+        return raise (Exception("unhandled exception from handle_http_codes", e))
     }
+
 
   let abort ctx name =
     let pm = mk_manager ctx
@@ -1135,7 +1147,7 @@ module Projections =
 //      return State.Parse res
 //    }
     let pm = mk_manager ctx
-    pm.GetStateAsync(name, ctx.creds) |> Async.AwaitTask |> handle_http_codes
+    pm.GetStateAsync(name, ctx.creds) |> Async.AwaitTask |> handle_http_codes ctx.logger
 
   let get_statistics ctx name =
     let pm = mk_manager ctx
@@ -1143,7 +1155,8 @@ module Projections =
 
   let get_status ctx name =
     let pm = mk_manager ctx
-    pm.GetStatusAsync(name, ctx.creds) |> Async.AwaitTask |> handle_http_codes
+    pm.GetStatusAsync(name, ctx.creds) |> Async.AwaitTask |> handle_http_codes ctx.logger
+
   let list_all ctx =
     let pm = mk_manager ctx
     pm.ListAllAsync ctx.creds |> Async.AwaitTask
@@ -1179,20 +1192,23 @@ module Projections =
     try
       do! setup_aggregate_projections ctx
       return! f ()
-    with e -> return! on_error ctx f e
+    with e -> return! on_error ctx f e e
     }
-  and on_error ctx f err = async {
+  and on_error ctx f orig_err err = async {
     match err with
     | :? AggregateException as ae -> // unwrap it
-      return! on_error ctx f (ae.InnerException)
+      return! on_error ctx f orig_err (ae.InnerException)
     | :? ProjectionCommandFailedException as e
         when e.Message.Contains("Not yet ready.") ->
       ctx.logger.Info "... waiting for server to get ready ..."
       do! Async.Sleep 1000
       return! wait_for_init ctx f
-    | e -> raise (Exception("exception in wait_for_init", e))
+    | e when e.InnerException <> null ->
+      return! on_error ctx f orig_err (e.InnerException)
+    | e ->
+      raise (Exception("exception in wait_for_init", orig_err))
     }
-
+ 
   let ensure_continuous ctx name query =
     let pm = mk_manager ctx
     async {
@@ -1206,7 +1222,7 @@ module Projections =
         ctx.logger.Debug "calling create_continuous from not Running case"
         do! create_continuous ctx name query
       | other ->
-        ctx.logger.Debug "calling get_status"
+        ctx.logger.Debug (sprintf "got %O back" other)
         return ()
     }
 

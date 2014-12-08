@@ -1081,6 +1081,17 @@ module Projections =
   let private mk_manager ctx =
     ProjectionsManager(ctx.logger, ctx.ep, ctx.timeout)
 
+  let private handle_http_codes v =
+    async {
+      try
+        let! status = v
+        return Some status
+      with
+      | :? ProjectionCommandFailedException as pcfe
+          when pcfe.Message.Contains "404 (Not Found)" ->
+        return None
+    }
+
   let abort ctx name =
     let pm = mk_manager ctx
     pm.AbortAsync(name, ctx.creds) |> Async.AwaitTask
@@ -1124,7 +1135,7 @@ module Projections =
 //      return State.Parse res
 //    }
     let pm = mk_manager ctx
-    pm.GetStateAsync(name, ctx.creds) |> Async.AwaitTask
+    pm.GetStateAsync(name, ctx.creds) |> Async.AwaitTask |> handle_http_codes
 
   let get_statistics ctx name =
     let pm = mk_manager ctx
@@ -1132,8 +1143,7 @@ module Projections =
 
   let get_status ctx name =
     let pm = mk_manager ctx
-    pm.GetStatusAsync(name, ctx.creds) |> Async.AwaitTask
-
+    pm.GetStatusAsync(name, ctx.creds) |> Async.AwaitTask |> handle_http_codes
   let list_all ctx =
     let pm = mk_manager ctx
     pm.ListAllAsync ctx.creds |> Async.AwaitTask
@@ -1155,30 +1165,49 @@ module Projections =
     async {
       for stream in streams do
         let! state = stream |> get_status ctx
-        if state.Contains "Running" then () else
-          printfn "projection '%s' in state '%s', enabling now"  stream state
+        match state with
+        | None ->
           do! stream |> enable ctx
+        | Some state when not (state.Contains "Running") ->
+          ctx.logger.Debug (sprintf "projection '%s' in state '%s', enabling now"  stream state)
+          do! stream |> enable ctx
+        | _ -> return ()
     }
 
-  let rec wait_for_init ctx (f : ProjectionsManager -> _ Async) = async {
+  let rec wait_for_init ctx (f : unit -> Async<_>) = async {
     let pm = mk_manager ctx
     try
       do! setup_aggregate_projections ctx
-      return! f pm
-    with
+      return! f ()
+    with e -> return! on_error ctx f e
+    }
+  and on_error ctx f err = async {
+    match err with
+    | :? AggregateException as ae -> // unwrap it
+      return! on_error ctx f (ae.InnerException)
     | :? ProjectionCommandFailedException as e
         when e.Message.Contains("Not yet ready.") ->
       ctx.logger.Info "... waiting for server to get ready ..."
       do! Async.Sleep 1000
       return! wait_for_init ctx f
+    | e -> raise (Exception("exception in wait_for_init", e))
     }
 
   let ensure_continuous ctx name query =
     let pm = mk_manager ctx
     async {
+      ctx.logger.Debug "calling get_status"
       let! status = get_status ctx name
-      if not (status.Contains "Running") then
+      match status with
+      | None -> 
+        ctx.logger.Debug "calling create_continuous from 404 case"
         do! create_continuous ctx name query
+      | Some status when not (status.Contains "Running") ->
+        ctx.logger.Debug "calling create_continuous from not Running case"
+        do! create_continuous ctx name query
+      | other ->
+        ctx.logger.Debug "calling get_status"
+        return ()
     }
 
 module Write =

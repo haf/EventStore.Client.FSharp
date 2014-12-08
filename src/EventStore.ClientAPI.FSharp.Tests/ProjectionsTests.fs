@@ -31,7 +31,7 @@ let roundtrip_tests =
       timeout = TimeSpan.FromSeconds 8.
       creds   = UserCredentials ("admin", "changeit") }
 
-  let eventstore_impl = with_real_es
+  let eventstore_impl = with_embedded_es
 
   testList "read your writes" [
     testCase "assumption: expected URN" <| fun _ ->
@@ -46,41 +46,41 @@ let roundtrip_tests =
           }
         |> Async.RunSynchronously
 
-    testCase "cmds: can execute against Aggregate" <| fun _ ->
-      with_connection eventstore_impl <| fun conn ->
-        "programmers-1" |> Projections.delete proj_ctx |> Async.RunSynchronously
-        let evts =
-          CodeLikeHell
-          |> LifeOfAProgrammer.write conn "programmers-1" NoStream
-          |> Async.RunSynchronously
-
-        match evts with
-        | [_; MetAYakAndShavedIt] -> ()
-        | es -> Tests.failtest "got %A, expected hairy Yak" es
-
-        let _ =
-          PublishNuget
-          |> LifeOfAProgrammer.write conn "programmers-1" (Specific 2u)
-          |> Async.RunSynchronously
-        ()
-
-    testCase "projections: init/update/ensure" <| fun _ ->
-      let ensure_projections () =
-        Projections.wait_for_init proj_ctx <| fun _ -> async {
-            do! ("EventCounting", resource "EventCounting.js") ||> Projections.ensure_continuous proj_ctx
-            do! ("IsHeAManagerYet", resource "IsHeAManagerYet.js") ||> Projections.ensure_continuous proj_ctx
-          }
-        |> Async.RunSynchronously
-
-      let write_code_command conn =
-        CodeLikeHell
-        |> LifeOfAProgrammer.write conn "programmers-2" NoStream
-        |> Async.RunSynchronously
-        |> ignore
-
-      with_connection eventstore_impl <| fun conn ->
-        ensure_projections ()
-        write_code_command conn
-        let state = "EventCounting" |> Projections.get_state proj_ctx |> Async.RunSynchronously
-        printfn "state: %s" state
+//    testCase "cmds: can execute against Aggregate" <| fun _ ->
+//      with_connection eventstore_impl <| fun conn ->
+//        "programmers-1" |> Projections.delete proj_ctx |> Async.RunSynchronously
+//        let evts =
+//          CodeLikeHell
+//          |> LifeOfAProgrammer.write conn "programmers-1" NoStream
+//          |> Async.RunSynchronously
+//
+//        match evts with
+//        | [_; MetAYakAndShavedIt] -> ()
+//        | es -> Tests.failtest "got %A, expected hairy Yak" es
+//
+//        let _ =
+//          PublishNuget
+//          |> LifeOfAProgrammer.write conn "programmers-1" (Specific 2u)
+//          |> Async.RunSynchronously
+//        ()
+//
+//    testCase "projections: init/update/ensure" <| fun _ ->
+//      let ensure_projections () =
+//        Projections.wait_for_init proj_ctx <| fun _ -> async {
+//            do! ("EventCounting", resource "EventCounting.js") ||> Projections.ensure_continuous proj_ctx
+//            do! ("IsHeAManagerYet", resource "IsHeAManagerYet.js") ||> Projections.ensure_continuous proj_ctx
+//          }
+//        |> Async.RunSynchronously
+//
+//      let write_code_command conn =
+//        CodeLikeHell
+//        |> LifeOfAProgrammer.write conn "programmers-2" NoStream
+//        |> Async.RunSynchronously
+//        |> ignore
+//
+//      with_connection eventstore_impl <| fun conn ->
+//        ensure_projections ()
+//        write_code_command conn
+//        let state = "EventCounting" |> Projections.get_state proj_ctx |> Async.RunSynchronously
+//        printfn "state: %A" state
     ]

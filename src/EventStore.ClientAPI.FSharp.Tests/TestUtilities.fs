@@ -3,6 +3,7 @@
 open System.Reflection
 open System.Net
 open System.IO
+open System.Threading
 
 open EventStore.Core
 open EventStore.ClientAPI
@@ -16,6 +17,13 @@ let with_embedded_es f =
                                   .RunProjections(ProjectionsMode.All)
                                   .WithWorkerThreads(16)
                                   .Build()
+  use are = new AutoResetEvent(false)
+  use sub =
+    node.NodeStatusChanged.Subscribe(fun args ->
+      args.NewVNodeState
+      |> function
+         | Data.VNodeState.Shutdown -> are.Set() |> ignore
+         | _                        -> ())
   try
     printfn "starting embedded EventStore"
     node.Start()
@@ -23,6 +31,7 @@ let with_embedded_es f =
   finally
     printfn "stopping embedded EventStore"
     node.Stop()
+    are.WaitOne() |> ignore
     printfn "stopped embedded EventStore"
 
 let with_real_es f = f ()

@@ -1149,11 +1149,11 @@ module Projections =
     pm.GetStatisticsAsync(name, ctx.creds) |> Async.AwaitTask
 
   // reflection error with following line:
-  type Status = JsonProvider<"get_status_sample.json">
-//  type Status =
-//    { Status : string }
-//    static member Parse (str : string) =
-//      { Status = "Stopped" }
+//  type Status = JsonProvider<"get_status_sample.json">
+  type Status =
+    { Status : string }
+    static member Parse (str : string) =
+      { Status = "Stopped" }
 
   let get_status ctx name =
     let pm = mk_manager ctx

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>EventStore.ClientAPI.FSharp</RootNamespace>
     <AssemblyName>EventStore.ClientAPI.FSharp</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>EventStore.ClientAPI.FSharp</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -89,6 +89,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharpx.Core">
               <HintPath>..\..\packages\FSharpx.Core\lib\35\FSharpx.Core.dll</HintPath>
               <Private>True</Private>
@@ -97,6 +102,9 @@
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net40\Newtonsoft.Json.dll</HintPath>
               <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="System.Xml.Linq">
               <Paket>True</Paket>
             </Reference>
           </ItemGroup>
@@ -118,6 +126,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharpx.Core">
               <HintPath>..\..\packages\FSharpx.Core\lib\40\FSharpx.Core.dll</HintPath>
               <Private>True</Private>
@@ -147,6 +160,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharpx.Core">
               <HintPath>..\..\packages\FSharpx.Core\lib\40\FSharpx.Core.dll</HintPath>
               <Private>True</Private>
@@ -164,6 +182,15 @@
     <When Condition="$(TargetFrameworkIdentifier) == '.NETPortable'">
       <Choose>
         <When Condition="$(TargetFrameworkProfile) == 'net4+sl4+wp71+win8' And $(TargetPlatformIdentifier) == 'Portable' And $(TargetPlatformVersion) == '7.0'" />
+        <When Condition="$(TargetFrameworkProfile) == 'net40+sl5+wp8+win8' And $(TargetPlatformIdentifier) == 'Portable' And $(TargetPlatformVersion) == '7.0'">
+          <ItemGroup>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\portable-net40+sl5+wp8+win8\FSharp.Data.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+          </ItemGroup>
+        </When>
         <When Condition="$(TargetFrameworkProfile) == 'Profile136' And $(TargetPlatformIdentifier) == 'Portable' And $(TargetPlatformVersion) == '7.0'">
           <ItemGroup>
             <Reference Include="Newtonsoft.Json">
@@ -173,8 +200,22 @@
             </Reference>
           </ItemGroup>
         </When>
+        <When Condition="$(TargetFrameworkProfile) == 'net45+wp80+win8+wpa81+aspnetcore50' And $(TargetPlatformIdentifier) == 'Portable' And $(TargetPlatformVersion) == '7.0'">
+          <ItemGroup>
+            <Reference Include="Newtonsoft.Json">
+              <HintPath>..\..\packages\Newtonsoft.Json\lib\portable-net45+wp80+win8+wpa81+aspnetcore50\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+          </ItemGroup>
+        </When>
         <Otherwise>
           <ItemGroup>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\portable-net40+sl5+wp8+win8\FSharp.Data.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\portable-net45+wp80+win8+wpa81+aspnetcore50\Newtonsoft.Json.dll</HintPath>
               <Private>True</Private>
@@ -198,6 +239,11 @@
         </Reference>
         <Reference Include="policy.2.3.FSharp.Core">
           <HintPath>..\..\packages\FSharp.Core.3\lib\net40\policy.2.3.FSharp.Core.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="FSharp.Data">
+          <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -227,6 +273,11 @@
         </Reference>
         <Reference Include="policy.2.3.FSharp.Core">
           <HintPath>..\..\packages\FSharp.Core.3\lib\net40\policy.2.3.FSharp.Core.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="FSharp.Data">
+          <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -261,6 +312,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharpx.Core">
               <HintPath>..\..\packages\FSharpx.Core\lib\40\FSharpx.Core.dll</HintPath>
               <Private>True</Private>
@@ -290,6 +346,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
               <Private>True</Private>
@@ -311,6 +372,11 @@
             </Reference>
             <Reference Include="policy.2.3.FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\policy.2.3.FSharp.Core.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\portable-net40+sl5+wp8+win8\FSharp.Data.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -345,6 +411,11 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="FSharp.Data">
+          <HintPath>..\..\packages\FSharp.Data\lib\portable-net40+sl5+wp8+win8\FSharp.Data.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="Newtonsoft.Json">
           <HintPath>..\..\packages\Newtonsoft.Json\lib\netcore45\Newtonsoft.Json.dll</HintPath>
           <Private>True</Private>
@@ -368,6 +439,11 @@
             </Reference>
             <Reference Include="policy.2.3.FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\policy.2.3.FSharp.Core.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -400,6 +476,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\portable-net40+sl5+wp8+win8\FSharp.Data.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharpx.Core">
               <HintPath>..\..\packages\FSharpx.Core\lib\40\FSharpx.Core.dll</HintPath>
               <Private>True</Private>
@@ -426,6 +507,11 @@
             </Reference>
             <Reference Include="policy.2.3.FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\policy.2.3.FSharp.Core.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="FSharp.Data">
+              <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -460,6 +546,11 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="FSharp.Data">
+          <HintPath>..\..\packages\FSharp.Data\lib\net40\FSharp.Data.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="FSharpx.Core">
           <HintPath>..\..\packages\FSharpx.Core\lib\40\FSharpx.Core.dll</HintPath>
           <Private>True</Private>
@@ -478,6 +569,7 @@
     <None Include="paket.references" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="AssemblyVersionInfo.fs" />
+    <None Include="get_status_sample.json" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

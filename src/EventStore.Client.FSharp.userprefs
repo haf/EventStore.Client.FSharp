@@ -1,6 +1,12 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="EventStore.ClientAPI.FSharp/EventStore.Client.FSharp.fs">
+    <Files>
+      <File FileName="EventStore.ClientAPI.FSharp.Tests/TestUtilities.fs" Line="36" Column="36" />
+      <File FileName="EventStore.ClientAPI.FSharp.Tests/ProjectionsTests.fs" Line="43" Column="43" />
+      <File FileName="EventStore.ClientAPI.FSharp/EventStore.Client.FSharp.fs" Line="18" Column="18" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>

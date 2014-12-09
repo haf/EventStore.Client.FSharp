@@ -4,7 +4,7 @@ namespace EventStore.ClientAPI
 
 /// The specific event version to read as detailed on ReadEventAsync
 type EventVersion =
-  | Specific of uint32
+  | SpecificEvent of uint32
   /// -1 - read the last written event
   | LastInStream
 
@@ -37,34 +37,7 @@ type ResolveLinksStrategy =
   | ResolveLinks
   | DontResolveLinks
 
-module internal Helpers =
-
-  let validUint (b : uint32) =
-    if b > uint32(System.Int32.MaxValue) then
-      failwith <| sprintf "too large start %A, gt int32 max val" b
-    else int b
-
-  let action  f = new System.Action<_>(f)
-  let action2 f = new System.Action<_, _>(f)
-  let action3 f = new System.Action<_, _, _>(f)
-
-  open EventStore.ClientAPI
-
-  let (|EventVersion|) = function
-    | EventVersion.Specific i -> int i
-    | LastInStream            -> -1
-
-  /// (Active-) pattern match out the GetEventStore integer value denoting each
-  /// of the cases in the discriminated union ExpectedVersionUnion.
-  let (|ExpectedVersion|) = function
-    | Specific i  -> int i
-    | EmptyStream -> ExpectedVersion.EmptyStream
-    | NoStream    -> ExpectedVersion.NoStream
-    | Any         -> ExpectedVersion.Any
-
-  let (|ResolveLinks|) = function
-    | ResolveLinks     -> true
-    | DontResolveLinks -> false
+module AsyncHelpers =
 
   open System
   open System.Threading.Tasks
@@ -84,6 +57,40 @@ module internal Helpers =
       else tcs.SetResult(())), TaskContinuationOptions.ExecuteSynchronously)
     |> ignore
     tcs.Task |> Async.AwaitTask |> rewrapAsyncExn
+
+  type Microsoft.FSharp.Control.Async with
+    static member AwaitTask t = awaitTask t
+
+module internal Helpers =
+
+  let validUint (b : uint32) =
+    if b > uint32(System.Int32.MaxValue) then
+      failwithf "too large start %A, gt int32 max val" b
+    else int b
+
+  let action  f = new System.Action<_>(f)
+  let action2 f = new System.Action<_, _>(f)
+  let action3 f = new System.Action<_, _, _>(f)
+
+  open EventStore.ClientAPI
+
+  let (|EventVersion|) = function
+    | SpecificEvent i -> int i
+    | LastInStream    -> -1
+
+  /// (Active-) pattern match out the GetEventStore integer value denoting each
+  /// of the cases in the discriminated union ExpectedVersionUnion.
+  let (|ExpectedVersion|) = function
+    | Specific i  -> int i
+    | EmptyStream -> ExpectedVersion.EmptyStream
+    | NoStream    -> ExpectedVersion.NoStream
+    | Any         -> ExpectedVersion.Any
+
+  let (|ResolveLinks|) = function
+    | ResolveLinks     -> true
+    | DontResolveLinks -> false
+
+  open System
 
   open EventStore.ClientAPI.Exceptions
 
@@ -339,6 +346,7 @@ type Connection =
 module TypeExtensions =
 
   open Helpers
+  open AsyncHelpers
 
   type EventStore.ClientAPI.IEventStoreConnection with
     /// Convert the connection to be usable with the F# API (an interface
@@ -778,6 +786,7 @@ module Types =
 module Conn =
 
   open Helpers
+  open AsyncHelpers
 
   // BUILDING CONNECTION
 
@@ -953,6 +962,7 @@ module Conn =
 module Tx =
 
   open Helpers
+  open AsyncHelpers
   open EventStore.ClientAPI
   open Conn
 
@@ -1038,9 +1048,190 @@ module Events =
       ; Data     = Encoding.UTF8.GetBytes json
       ; IsJson   = true }
 
-module Read =
+
+type ProjectionsCtx =
+  { logger  : ILogger
+    ep      : IPEndPoint
+    timeout : TimeSpan
+    creds   : SystemData.UserCredentials }
+
+module Projections =
+
+  open Helpers
+  open AsyncHelpers
+
+  open EventStore.ClientAPI
+  open EventStore.ClientAPI.Exceptions
+
+  open FSharp.Data
+
   [<Literal>]
   let Description = "A module that encapsulates read patterns against the event store"
+
+  let private ``404 is just fine`` f =
+    async {
+      try
+        return! f ()
+      with 
+      | :? ProjectionCommandFailedException as e
+          when e.Message.Contains("404 (Not Found)") ->
+        return ()
+    }
+
+  let private mk_manager ctx =
+    ProjectionsManager(ctx.logger, ctx.ep, ctx.timeout)
+
+  let rec private handle_http_codes (logger : ILogger) v =
+    async {
+      try
+        let! status = v
+        return Some status
+      with e -> return! on_http_error logger v e e
+    }
+  and on_http_error logger v orig_ex (ex : exn) =
+    async {
+      match ex with
+      | :? ProjectionCommandFailedException as pcfe
+          when pcfe.Message.Contains "404 (Not Found)" ->
+        return None
+      | :? AggregateException as ae ->
+        return! on_http_error logger v orig_ex (ae.InnerException)
+      | :? WebException as we when we.Message.Contains "Aborted" ->
+        return! handle_http_codes logger v
+      | e ->
+        logger.Error (sprintf "unhandled exception from handle_http_codes:\n%O" e)
+        return raise (Exception("unhandled exception from handle_http_codes", e))
+    }
+
+
+  let abort ctx name =
+    let pm = mk_manager ctx
+    pm.AbortAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let enable ctx name =
+    let pm = mk_manager ctx
+    pm.EnableAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let create_continuous ctx name query =
+    let pm = mk_manager ctx
+    pm.CreateContinuousAsync(name, query, ctx.creds) |> Async.AwaitTask
+
+  let create_one_time ctx query =
+    let pm = mk_manager ctx
+    pm.CreateOneTimeAsync(query, ctx.creds) |> Async.AwaitTask
+
+  let create_transient ctx name query =
+    let pm = mk_manager ctx
+    pm.CreateTransientAsync(name, query, ctx.creds) |> Async.AwaitTask
+
+  let delete ctx name =
+    let pm = mk_manager ctx
+    pm.DeleteAsync(name, ctx.creds)
+    |> Async.AwaitTask
+    |> handle_http_codes ctx.logger
+    |> Async.Ignore
+
+  let disable ctx name =
+    let pm = mk_manager ctx
+    ``404 is just fine`` <| fun _ ->
+      pm.DisableAsync(name, ctx.creds)
+      |> Async.AwaitTask
+
+  let get_query ctx name =
+    let pm = mk_manager ctx
+    pm.GetQueryAsync(name, ctx.creds) |> Async.AwaitTask
+
+  let get_state ctx name =
+    let pm = mk_manager ctx
+    pm.GetStateAsync(name, ctx.creds)
+    |> Async.AwaitTask
+    |> handle_http_codes ctx.logger
+
+  let get_statistics ctx name =
+    let pm = mk_manager ctx
+    pm.GetStatisticsAsync(name, ctx.creds) |> Async.AwaitTask
+
+  // reflection error with following line:
+  type Status = JsonProvider<"get_status_sample.json">
+
+  let get_status ctx name =
+    let pm = mk_manager ctx
+    async {
+      let! res =
+        pm.GetStatusAsync(name, ctx.creds)
+        |> Async.AwaitTask
+        |> handle_http_codes ctx.logger
+      return res |> Option.map Status.Parse
+    }
+
+  let list_all ctx =
+    let pm = mk_manager ctx
+    pm.ListAllAsync ctx.creds |> Async.AwaitTask
+
+  let list_continuous ctx =
+    let pm = mk_manager ctx
+    pm.ListContinuousAsync ctx.creds |> Async.AwaitTask
+
+  let list_one_time ctx =
+    let pm = mk_manager ctx
+    pm.ListOneTimeAsync ctx.creds |> Async.AwaitTask
+
+  let update_query ctx name query =
+    let pm = mk_manager ctx
+    pm.UpdateQueryAsync(name, query, ctx.creds) |> Async.AwaitTask
+
+  let setup_aggregate_projections ctx  =
+    let streams = [ "$by_category"; "$stream_by_category" ]
+    async {
+      for stream in streams do
+        let! status = stream |> get_status ctx
+        match status with
+        | None ->
+          do! stream |> enable ctx
+        | Some status when status.Status <> "Running" ->
+          ctx.logger.Debug (sprintf "projection '%s' in status '%A', enabling now"  stream status)
+          do! stream |> enable ctx
+        | _ -> return ()
+    }
+
+  let rec wait_for_init ctx (f : unit -> Async<_>) = async {
+    let pm = mk_manager ctx
+    try
+      do! setup_aggregate_projections ctx
+      return! f ()
+    with e -> return! on_error ctx f e e
+    }
+  and on_error ctx f orig_err err = async {
+    match err with
+    | :? AggregateException as ae -> // unwrap it
+      return! on_error ctx f orig_err (ae.InnerException)
+    | :? ProjectionCommandFailedException as e
+        when e.Message.Contains("Not yet ready.") ->
+      ctx.logger.Info "... waiting 1000 ms for server to get ready ..."
+      do! Async.Sleep 1000
+      return! wait_for_init ctx f
+    | e when e.InnerException <> null ->
+      return! on_error ctx f orig_err (e.InnerException)
+    | e ->
+      raise (Exception("exception in wait_for_init", orig_err))
+    }
+ 
+  let ensure_continuous ctx name query =
+    let pm = mk_manager ctx
+    async {
+      ctx.logger.Debug "calling get_status"
+      let! status = get_status ctx name
+      match status with
+      | None -> 
+        ctx.logger.Debug "calling create_continuous from 404 case"
+        do! create_continuous ctx name query
+      | Some status when status.Status <> "Running" ->
+        ctx.logger.Debug "calling create_continuous from not Running case"
+        do! create_continuous ctx name query
+      | other ->
+        ctx.logger.Debug (sprintf "got %O back" other)
+        return ()
+    }
 
 module Write =
   [<Literal>]

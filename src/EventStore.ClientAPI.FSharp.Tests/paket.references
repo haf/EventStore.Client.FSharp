@@ -1,2 +1,6 @@
-EventStore.Client
 Fuchu
+protobuf-net
+EventStore.Client.Embedded
+Intelliplan.JsonNet
+FSharpx.Core
+NLog

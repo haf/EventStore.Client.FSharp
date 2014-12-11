@@ -72,6 +72,10 @@ module internal Helpers =
   let action2 f = new System.Action<_, _>(f)
   let action3 f = new System.Action<_, _, _>(f)
 
+  /// f' is a functor that maps origF's second argument from 'b to 'x
+  let functor2 (fMap : 'x -> 'b) (origF : _ -> 'b -> _) : (_ -> 'x -> _) =
+    fun a x -> origF a (fMap x)
+
   open EventStore.ClientAPI
 
   let (|EventVersion|) = function
@@ -931,21 +935,23 @@ module Conn =
   /// SubscribeToStream
   let subscribe (c : Connection) streamId resolveLinks eventAppeared subscriptionDropped userCredentials =
     c.SubscribeToStreamAsync(streamId, resolveLinks,
-                             eventAppeared |> action2,
+                             eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                              subscriptionDropped |> Option.map action3,
                              userCredentials)
 
   /// SubscribeToStreamFrom
   let subscribeFrom (c : Connection) streamId fromEvt resolveLinks eventAppeared
     liveProcessingStarted subscriptionDropped userCredentials =
-    c.SubscribeToStreamFrom(streamId, fromEvt, resolveLinks, eventAppeared |> action2,
+    c.SubscribeToStreamFrom(streamId, fromEvt, resolveLinks,
+                            eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                             liveProcessingStarted |> Option.map action,
                             subscriptionDropped |> Option.map action3,
                             userCredentials)
 
   /// SubscribeToAll
   let subscribeAll (c : Connection) resolveLinks eventAppeared subscriptionDropped userCredentials =
-    c.SubscribeToAllAsync(resolveLinks, eventAppeared |> action2,
+    c.SubscribeToAllAsync(resolveLinks,
+                          eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                           subscriptionDropped |> Option.map action3,
                           userCredentials)
       |> Async.AwaitTask
@@ -953,7 +959,8 @@ module Conn =
   /// SubscribeToAllFrom
   let subscribeAllFrom (c : Connection) fromPos resolveLinks eventAppeared 
     liveProcessingStarted subscriptionDropped userCredentials =
-    c.SubscribeToAllFrom(fromPos, resolveLinks, eventAppeared |> action2,
+    c.SubscribeToAllFrom(fromPos, resolveLinks,
+                         eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                          liveProcessingStarted |> Option.map action,
                          subscriptionDropped |> Option.map action3,
                          userCredentials)
@@ -1414,11 +1421,11 @@ module Repo =
           return raise (StreamWrongExpectedVersion(ex)) }
 
   /// Creates event store based repository.
-  /// The 'serialize' function returns the type name and the serialised byte array
+  /// The 'serialise' function returns the type name and the serialised byte array
   [<CompiledName("Make")>]
   let make (conn : Connection)
-           (serialize   : obj -> string * byte array)
-           (deserialize : Type * byte array -> obj)
+           (serialise   : obj -> string * byte array)
+           (deserialise : Type * byte array -> obj)
            =
 
-    load deserialize conn, commit serialize conn
+    load deserialise conn, commit serialise conn

@@ -491,6 +491,8 @@ module Types =
       Metadata : byte array
       Data     : byte array
       Number   : uint32 }
+    override x.ToString() =
+      sprintf "%A" x
     static member FromEventData streamId number (evt : EventData) =
       { Id       = evt.Id
         StreamId = streamId
@@ -551,6 +553,8 @@ module Types =
     { Event               : RecordedEvent
       Link                : RecordedEvent option
       OriginalPosition    : Position option }
+    override x.ToString() =
+      sprintf "%A" x
 
   let unwrapResolvedEvent (e : ResolvedEvent) =
     newResolvedEvent (e.Event |> unwrapRecordedEvent) (e.Link |> Option.fold (fun s -> unwrapRecordedEvent) null) (Option.toNullable e.OriginalPosition)

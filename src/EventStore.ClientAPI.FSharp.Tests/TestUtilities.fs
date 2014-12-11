@@ -12,10 +12,13 @@ open EventStore.Core.Messages
 open EventStore.Core.Bus
 open EventStore.ClientAPI
 open EventStore.ClientAPI.Embedded
+open EventStore.ClientAPI.Common.Log
 
 open NLog
 open NLog.Config
 open NLog.Targets
+
+let lm : (Logary.LogManager option ref) = ref None
 
 let conf_nlog () =
   let config = match LogManager.Configuration with | null -> new LoggingConfiguration () | cfg -> cfg
@@ -57,8 +60,9 @@ let with_real_es f = f ()
 let with_connection factory f =
   factory <| fun _ ->
     let conn =
-      Conn.configureStart()
-      |> Conn.configureEnd (IPEndPoint(IPAddress.Loopback, 1113))
+      ConnectionSettings.configureStart()
+      |> ConnectionSettings.useCustomLogger (LogaryLogger((!lm).Value.GetLogger("EventStore")))
+      |> ConnectionSettings.configureEnd (IPEndPoint(IPAddress.Loopback, 1113))
     conn |> Conn.connect |> Async.RunSynchronously
     try f conn
     finally conn |> Conn.close

@@ -1,10 +1,12 @@
 source https://www.nuget.org/api/v2
 
 nuget FSharpx.Core 1.8.41
-nuget Fuchu 0.4.0.0
-nuget NuGet.CommandLine 2.8.3
-nuget EventStore.Client.Embedded 3.0.1
-nuget Intelliplan.JsonNet 2.0.0
-nuget protobuf-net 2.0.0.668
+nuget Fuchu
+nuget NuGet.CommandLine
+nuget EventStore.Client.Embedded
+nuget Intelliplan.JsonNet
+nuget protobuf-net
 nuget FSharp.Data
 nuget nlog
+nuget EventStore.Client
+nuget Intelliplan.Logary.Adapters.EventStore

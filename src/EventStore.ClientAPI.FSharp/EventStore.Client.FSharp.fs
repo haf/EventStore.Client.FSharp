@@ -73,7 +73,7 @@ module internal Helpers =
   let action3 f = new System.Action<_, _, _>(f)
 
   /// f' is a functor that maps origF's second argument from 'b to 'x
-  let functor2 (fMap : 'x -> 'b) (origF : _ -> 'b -> _) : (_ -> 'x -> _) =
+  let functor2 (fMap : 'x -> 'b) (origF : _ -> 'b -> 'c) : (_ -> 'x -> 'c) =
     fun a x -> origF a (fMap x)
 
   open EventStore.ClientAPI
@@ -165,40 +165,6 @@ module internal Helpers =
 // https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/EventStore.fs
 // https://github.com/EventStore/getting-started-with-event-store/blob/master/src/GetEventStoreRepository/GetEventStoreRepository.cs
 // https://github.com/EventStore/getting-started-with-event-store/blob/master/src/GetEventStoreRepository.Tests/GetEventStoreRepositoryIntegrationTests.cs
-
-/// Wrapper F# API for the connection settings builder
-/// in the event store client API.
-module ConnBuilder =
-
-  open Helpers
-  open EventStore.ClientAPI
-
-  let enableVerboseLogging (s : ConnectionSettingsBuilder) =
-    s.EnableVerboseLogging ()
-
-  let keepReconnecting (s : ConnectionSettingsBuilder) =
-    s.KeepReconnecting ()
-
-  let keepRetrying (s : ConnectionSettingsBuilder) =
-    s.KeepRetrying ()
-
-  let limitAttemptsForOperationTo limit (s : ConnectionSettingsBuilder) =
-    s.LimitAttemptsForOperationTo limit
-
-  let limitConcurrentOperationsTo limit (s : ConnectionSettingsBuilder) =
-    s.LimitConcurrentOperationsTo limit
-
-  let limitOperationsQueueTo limit (s : ConnectionSettingsBuilder) =
-    s.LimitOperationsQueueTo limit
-
-  let limitReconnectionsTo limit (s : ConnectionSettingsBuilder) =
-    s.LimitReconnectionsTo limit
-
-  let limitRetriesForOperationTo limit (s : ConnectionSettingsBuilder) =
-    s.LimitRetriesForOperationTo limit
-
-  let setOperationTimeout timeout (s : ConnectionSettingsBuilder) =
-    s.SetOperationTimeoutTo timeout
 
 open System
 open System.Net
@@ -792,22 +758,6 @@ module Conn =
   open Helpers
   open AsyncHelpers
 
-  // BUILDING CONNECTION
-
-  /// Create a builder and use the module ConnBuilder to set the settings.
-  /// Call 'configureEnd' when you are done, to get the connection.
-  let configureStart () =
-    ConnectionSettings.Create()
-
-  /// End configuring the connection settings and return
-  /// a new connection with those settings (not connected).
-  let configureEnd (endpoint : IPEndPoint) (settingBuilder : ConnectionSettingsBuilder) = //, clusterBuilder : ClusterSettingsBuilder) =
-    let settings = ConnectionSettingsBuilder.op_Implicit(settingBuilder)
-//    let clusterSettings = ClusterSettingsBuilder.op_Implicit(clusterBuilder)
-//    let conn = EventStoreConnection.Create(settings, clusterSettings)
-    let conn = EventStoreConnection.Create(settings, endpoint)
-    conn.ApiWrap()
-
   // CONNECTION API
 
   /// AppendToStreamAsync:
@@ -964,6 +914,86 @@ module Conn =
                          liveProcessingStarted |> Option.map action,
                          subscriptionDropped |> Option.map action3,
                          userCredentials)
+
+module ConnectionSettings =
+  // BUILDING CONNECTION
+
+  /// Create a builder and use the module ConnBuilder to set the settings.
+  /// Call 'configureEnd' when you are done, to get the connection.
+  let configureStart () =
+    ConnectionSettings.Create()
+
+  /// End configuring the connection settings and return
+  /// a new connection with those settings (not connected).
+  let configureEnd (endpoint : IPEndPoint) (settingBuilder : ConnectionSettingsBuilder) = //, clusterBuilder : ClusterSettingsBuilder) =
+    let settings = ConnectionSettingsBuilder.op_Implicit(settingBuilder)
+//    let clusterSettings = ClusterSettingsBuilder.op_Implicit(clusterBuilder)
+//    let conn = EventStoreConnection.Create(settings, clusterSettings)
+    let conn = EventStoreConnection.Create(settings, endpoint)
+    conn.ApiWrap()
+
+  let useCustomLogger logger (b : ConnectionSettingsBuilder) =
+    b.UseCustomLogger logger
+
+  let useConsoleLogger (b : ConnectionSettingsBuilder) =
+    b.UseConsoleLogger ()
+
+  let useDebugLogger (b : ConnectionSettingsBuilder) =
+    b.UseDebugLogger ()
+
+  let enableVerboseLogging logger (b : ConnectionSettingsBuilder) =
+    b.EnableVerboseLogging ()
+  
+  let limitOperationsQueueTo (len : uint32) (b : ConnectionSettingsBuilder) =
+    b.LimitOperationsQueueTo (int len)
+
+  let limitAttemptsForOperationTo (len : uint32) (b : ConnectionSettingsBuilder) =
+    b.LimitConcurrentOperationsTo (int len)
+
+  let limitRetriesForOperationTo (len : uint32) (b : ConnectionSettingsBuilder) =
+    b.LimitRetriesForOperationTo (int len)
+
+  let keepRetrying (b : ConnectionSettingsBuilder) =
+    b.KeepRetrying ()
+
+  let limitReconnectionsTo limit (b : ConnectionSettingsBuilder) =
+    b.LimitReconnectionsTo limit
+
+  let keepReconnecting (b : ConnectionSettingsBuilder) =
+    b.KeepRetrying ()
+
+  let performOnMasterOnly (b : ConnectionSettingsBuilder) =
+    b.PerformOnMasterOnly ()
+
+  let performOnAnyNode (b : ConnectionSettingsBuilder) =
+    b.PerformOnAnyNode ()
+
+  let setReconnectionDelayTo delay (b : ConnectionSettingsBuilder) =
+    b.SetReconnectionDelayTo delay
+
+  let setOperationTimeoutTo timeout (b : ConnectionSettingsBuilder) =
+    b.SetOperationTimeoutTo timeout
+
+  let setTimeoutCheckPeriodTo timeout (b : ConnectionSettingsBuilder) =
+    b.SetTimeoutCheckPeriodTo timeout
+
+  let setDefaultUserCredentials creds (b : ConnectionSettingsBuilder) =
+    b.SetDefaultUserCredentials creds
+
+  let useSslConnection targetHost validateServer (b : ConnectionSettingsBuilder) =
+    b.UseSslConnection (targetHost, validateServer)
+
+  let failOnNoServerResponse (b : ConnectionSettingsBuilder) =
+    b.FailOnNoServerResponse ()
+
+  let setHeartbeatInterval interval (b : ConnectionSettingsBuilder) =
+    b.SetHeartbeatInterval interval
+
+  let setHeartbeatTimeout timeout (b : ConnectionSettingsBuilder) =
+    b.SetHeartbeatTimeout timeout
+
+  let withConnectionTimeoutOf timeout (b : ConnectionSettingsBuilder) =
+    b.WithConnectionTimeoutOf timeout
 
 /// Module for dealing with EventStore transactions
 module Tx =
@@ -1322,8 +1352,34 @@ module Repo =
 
   let private streamId (id: Aggregate.Id) = formatId (box id)
 
-  type StreamWrongExpectedVersion(inner : Exceptions.WrongExpectedVersionException) =
-    inherit Exception("Repo concurrency check failed", inner)
+  [<Literal>]
+  let VersionRegex = "Stream: ([\w\-\d]+), Expected version: (-?\d+)"
+
+  type StreamWrongExpectedVersion(triedToWrite : ExpectedVersionUnion,
+                                  inner : Exceptions.WrongExpectedVersionException) =
+    inherit Exception("Optimistic Concurrency Check Failed", inner)
+
+    let stream, actualVersion =
+      let m = System.Text.RegularExpressions.Regex.Match(inner.Message, VersionRegex)
+      m.Groups.[1].Value, (int m.Groups.[2].Value)
+
+    member x.TriedToWriteVersion = triedToWrite
+
+// we need to read into ES to get this!
+//    member x.DataActualVersion =
+//     (match actualVersion with
+//     | ExpectedVersion.Any -> Any
+//     | ExpectedVersion.EmptyStream (* EmptyStream same as NoStream *)
+//     | ExpectedVersion.NoStream -> NoStream
+//     | strange -> printfn "data version couldn't be parsed: %d" strange ; NoStream)
+
+    member x.Stream = stream
+
+    override x.ToString() =
+      sprintf "Optimistic Concurrency Check Failure. Write to EventStore expected version '%A', but stream '%s' was at version TODO"
+        (x.TriedToWriteVersion)
+        (x.Stream)
+//        (x.DataActualVersion)
 
   exception StreamNotFoundException of StreamId
   exception StreamHasBeenDeletedException of StreamId
@@ -1361,7 +1417,8 @@ module Repo =
           ReadDirection   = dir
           NextEventNumber = nextNo
           LastEventNumber = lastNo } ->
-        refs |> Seq.map (fun e -> deserialise (t, e.Event.Data) :?> 'a)
+        refs |> Seq.map (fun e ->
+          deserialise (t, e.Event.Data) :?> 'a)
 
     let rec loadSlice start count = asyncSeq {
       let! ses = conn |> read streamId start count DontResolveLinks None
@@ -1407,7 +1464,7 @@ module Repo =
         let! appended = preparedEvts |> Conn.append conn None streamId expected
         match appended with
         | Choice1Of2 _ -> return ()
-        | Choice2Of2 ex -> return raise (StreamWrongExpectedVersion(ex)) }
+        | Choice2Of2 ex -> return raise (StreamWrongExpectedVersion(expected, ex)) }
     // chunk the event stream and write them in a transaction
     | _ ->
       async {
@@ -1418,7 +1475,7 @@ module Repo =
             do! ch |> Tx.write tx
           do! tx |> Tx.commit
         | Choice2Of2 ex ->
-          return raise (StreamWrongExpectedVersion(ex)) }
+          return raise (StreamWrongExpectedVersion(expected, ex)) }
 
   /// Creates event store based repository.
   /// The 'serialise' function returns the type name and the serialised byte array

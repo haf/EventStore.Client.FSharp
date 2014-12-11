@@ -88,4 +88,5 @@ let units =
                    subject.Data)
       Assert.Equal("should say it's JSON",
                    true, subject.IsJson)
+
   ]

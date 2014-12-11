@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>EventStore.ClientAPI.FSharp.Tests</RootNamespace>
     <AssemblyName>EventStore.ClientAPI.FSharp.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>EventStore.ClientAPI.FSharp.Tests</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -121,6 +121,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Actor">
+              <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
               <Private>True</Private>
@@ -141,8 +146,23 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="Intelliplan.JsonNet.NodaTime">
+              <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary.Adapters.EventStore">
+              <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary">
+              <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -153,6 +173,11 @@
             </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net40\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -175,6 +200,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Actor">
+              <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
               <Private>True</Private>
@@ -195,8 +225,23 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="Intelliplan.JsonNet.NodaTime">
+              <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary.Adapters.EventStore">
+              <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary">
+              <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -207,6 +252,11 @@
             </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net40\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -229,6 +279,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Actor">
+              <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
               <Private>True</Private>
@@ -249,8 +304,23 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="Intelliplan.JsonNet.NodaTime">
+              <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary.Adapters.EventStore">
+              <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary">
+              <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -261,6 +331,11 @@
             </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -276,6 +351,15 @@
     <When Condition="$(TargetFrameworkIdentifier) == '.NETPortable'">
       <Choose>
         <When Condition="$(TargetFrameworkProfile) == 'net4+sl4+wp71+win8' And $(TargetPlatformIdentifier) == 'Portable' And $(TargetPlatformVersion) == '7.0'" />
+        <When Condition="$(TargetFrameworkProfile) == 'Profile328' And $(TargetPlatformIdentifier) == 'Portable' And $(TargetPlatformVersion) == '7.0'">
+          <ItemGroup>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+          </ItemGroup>
+        </When>
         <When Condition="$(TargetFrameworkProfile) == 'Profile136' And $(TargetPlatformIdentifier) == 'Portable' And $(TargetPlatformVersion) == '7.0'">
           <ItemGroup>
             <Reference Include="Newtonsoft.Json">
@@ -310,6 +394,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="protobuf-net">
               <HintPath>..\..\packages\protobuf-net\lib\portable-sl4+net40+wp7+windows8\protobuf-net.dll</HintPath>
               <Private>True</Private>
@@ -328,6 +417,11 @@
         </Reference>
         <Reference Include="EventStore.ClientAPI">
           <HintPath>..\..\packages\EventStore.Client\lib\net40\EventStore.ClientAPI.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="FSharp.Actor">
+          <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -351,8 +445,23 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="Intelliplan.JsonNet.NodaTime">
+          <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="Intelliplan.JsonNet">
           <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Logary.Adapters.EventStore">
+          <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Logary">
+          <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -363,6 +472,11 @@
         </Reference>
         <Reference Include="Newtonsoft.Json">
           <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="NodaTime">
+          <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -385,6 +499,11 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="FSharp.Actor">
+          <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="FSharp.Core">
           <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
           <Private>True</Private>
@@ -405,8 +524,23 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="Intelliplan.JsonNet.NodaTime">
+          <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="Intelliplan.JsonNet">
           <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Logary.Adapters.EventStore">
+          <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Logary">
+          <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -417,6 +551,11 @@
         </Reference>
         <Reference Include="Newtonsoft.Json">
           <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="NodaTime">
+          <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -441,6 +580,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Actor">
+              <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
               <Private>True</Private>
@@ -461,8 +605,23 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="Intelliplan.JsonNet.NodaTime">
+              <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary.Adapters.EventStore">
+              <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary">
+              <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -473,6 +632,11 @@
             </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -495,6 +659,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Actor">
+              <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
               <Private>True</Private>
@@ -510,8 +679,23 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="Intelliplan.JsonNet.NodaTime">
+              <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary.Adapters.EventStore">
+              <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary">
+              <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -522,6 +706,11 @@
             </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -541,6 +730,11 @@
             </Reference>
             <Reference Include="EventStore.ClientAPI">
               <HintPath>..\..\packages\EventStore.Client\lib\net40\EventStore.ClientAPI.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="FSharp.Actor">
+              <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -564,8 +758,23 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="Intelliplan.JsonNet.NodaTime">
+              <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary.Adapters.EventStore">
+              <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary">
+              <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -576,6 +785,11 @@
             </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -600,6 +814,11 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="FSharp.Actor">
+          <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="FSharp.Core">
           <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
           <Private>True</Private>
@@ -615,8 +834,23 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="Intelliplan.JsonNet.NodaTime">
+          <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="Intelliplan.JsonNet">
           <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Logary.Adapters.EventStore">
+          <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Logary">
+          <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -627,6 +861,11 @@
         </Reference>
         <Reference Include="Newtonsoft.Json">
           <HintPath>..\..\packages\Newtonsoft.Json\lib\netcore45\Newtonsoft.Json.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="NodaTime">
+          <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -651,6 +890,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Actor">
+              <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
               <Private>True</Private>
@@ -671,8 +915,23 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="Intelliplan.JsonNet.NodaTime">
+              <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary.Adapters.EventStore">
+              <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary">
+              <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -683,6 +942,11 @@
             </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -705,6 +969,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Actor">
+              <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
               <Private>True</Private>
@@ -725,8 +994,23 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="Intelliplan.JsonNet.NodaTime">
+              <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary.Adapters.EventStore">
+              <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary">
+              <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -737,6 +1021,11 @@
             </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -759,6 +1048,11 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="FSharp.Actor">
+              <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="FSharp.Core">
               <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
               <Private>True</Private>
@@ -779,8 +1073,23 @@
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
+            <Reference Include="Intelliplan.JsonNet.NodaTime">
+              <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
             <Reference Include="Intelliplan.JsonNet">
               <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary.Adapters.EventStore">
+              <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="Logary">
+              <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -791,6 +1100,11 @@
             </Reference>
             <Reference Include="Newtonsoft.Json">
               <HintPath>..\..\packages\Newtonsoft.Json\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+              <Private>True</Private>
+              <Paket>True</Paket>
+            </Reference>
+            <Reference Include="NodaTime">
+              <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
               <Private>True</Private>
               <Paket>True</Paket>
             </Reference>
@@ -815,6 +1129,11 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="FSharp.Actor">
+          <HintPath>..\..\packages\FSharp.Actor-logary\lib\net40\FSharp.Actor.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="FSharp.Core">
           <HintPath>..\..\packages\FSharp.Core.3\lib\net40\FSharp.Core.dll</HintPath>
           <Private>True</Private>
@@ -835,8 +1154,23 @@
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
+        <Reference Include="Intelliplan.JsonNet.NodaTime">
+          <HintPath>..\..\packages\Intelliplan.JsonNet.NodaTime\lib\net40\Intelliplan.JsonNet.NodaTime.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
         <Reference Include="Intelliplan.JsonNet">
           <HintPath>..\..\packages\Intelliplan.JsonNet\lib\net40\Intelliplan.JsonNet.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Logary.Adapters.EventStore">
+          <HintPath>..\..\packages\Intelliplan.Logary.Adapters.EventStore\lib\net40\Logary.Adapters.EventStore.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="Logary">
+          <HintPath>..\..\packages\Intelliplan.Logary\lib\net40\Logary.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -847,6 +1181,11 @@
         </Reference>
         <Reference Include="Newtonsoft.Json">
           <HintPath>..\..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
+          <Private>True</Private>
+          <Paket>True</Paket>
+        </Reference>
+        <Reference Include="NodaTime">
+          <HintPath>..\..\packages\NodaTime\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\NodaTime.dll</HintPath>
           <Private>True</Private>
           <Paket>True</Paket>
         </Reference>
@@ -871,17 +1210,13 @@
     <Compile Include="SampleDomain.fs" />
     <EmbeddedResource Include="IsHeAManagerYet.js" />
     <EmbeddedResource Include="EventCounting.js" />
+    <Compile Include="MatchingExpectedVersions.fs" />
     <Compile Include="ProjectionsTests.fs" />
+    <Compile Include="RepoTests.fs" />
     <Compile Include="ApiTests.fs" />
     <Compile Include="Program.fs" />
     <None Include="Script.fsx" />
     <None Include="paket.references" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\EventStore.ClientAPI.FSharp\EventStore.ClientAPI.FSharp.fsproj">
-      <Name>EventStore.ClientAPI.FSharp</Name>
-      <Project>{AFF2ACA3-0084-4A40-96F9-F0886601A925}</Project>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -895,4 +1230,10 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <ProjectReference Include="..\EventStore.ClientAPI.FSharp\EventStore.ClientAPI.FSharp.fsproj">
+      <Project>{AFF2ACA3-0084-4A40-96F9-F0886601A925}</Project>
+      <Name>EventStore.ClientAPI.FSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

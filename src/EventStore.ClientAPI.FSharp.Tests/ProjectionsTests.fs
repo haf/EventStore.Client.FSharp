@@ -31,27 +31,28 @@ let roundtrip_tests =
       timeout = TimeSpan.FromSeconds 8.
       creds   = UserCredentials ("admin", "changeit") }
 
-  let eventstore_impl = with_embedded_es
+  let eventstore_impl = with_real_es
 
   testList "read your writes" [
     testCase "assumption: expected URN" <| fun _ ->
       let n = TypeNaming.nameObj MetAYakAndShavedIt
       Assert.Equal("expected name", "urn:Tests:LifeOfAProgrammer_Evt|MetAYakAndShavedIt", n)
 
-    testCase "initialisation: can add read model" <| fun _ ->
-      eventstore_impl <| fun _ ->
-        Projections.wait_for_init proj_ctx <| fun _ -> async {
-            do! Projections.ensure_continuous proj_ctx "EventCounting" (resource "EventCounting.js")
-            do! Projections.ensure_continuous proj_ctx "IsHeAManagerYet" (resource "IsHeAManagerYet.js")
-          }
-        |> Async.RunSynchronously
+//    testCase "initialisation: can add read model" <| fun _ ->
+//      eventstore_impl <| fun _ ->
+//        Projections.wait_for_init proj_ctx <| fun _ -> async {
+//            do! Projections.ensure_continuous proj_ctx "EventCounting" (resource "EventCounting.js")
+//            do! Projections.ensure_continuous proj_ctx "IsHeAManagerYet" (resource "IsHeAManagerYet.js")
+//          }
+//        |> Async.RunSynchronously
 
     testCase "cmds: can execute against Aggregate" <| fun _ ->
       with_connection eventstore_impl <| fun conn ->
-        "programmers-1" |> Projections.delete proj_ctx |> Async.RunSynchronously
+        let id = (sprintf "programmers-%s" (Guid.NewGuid().ToString().Replace("-", "")))
+        id |> Projections.delete proj_ctx |> Async.RunSynchronously
         let evts =
           CodeLikeHell
-          |> LifeOfAProgrammer.write conn "programmers-1" NoStream
+          |> LifeOfAProgrammer.write conn id NoStream
           |> Async.RunSynchronously
 
         match evts with
@@ -60,7 +61,7 @@ let roundtrip_tests =
 
         let _ =
           PublishNuget
-          |> LifeOfAProgrammer.write conn "programmers-1" (Specific 2u)
+          |> LifeOfAProgrammer.write conn id (Specific 1u)
           |> Async.RunSynchronously
         ()
 //

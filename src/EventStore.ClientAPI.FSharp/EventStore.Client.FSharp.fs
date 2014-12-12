@@ -892,6 +892,7 @@ module Conn =
                              eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                              subscriptionDropped |> Option.map action3,
                              userCredentials)
+    |> Async.AwaitTask
 
   /// SubscribeToStreamFrom
   let subscribeFrom (c : Connection) streamId fromEvt resolveLinks eventAppeared

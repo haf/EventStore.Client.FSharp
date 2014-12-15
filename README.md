@@ -63,7 +63,7 @@ Anyone is welcome to answer.
 
 ## Roadmap
 
- - [ ] API-parity with v3.0
+ - [x] API-parity with v3.0
  - [ ] Snapshot helpers for Aggregates
  - [x] Fix depdencies for nuget:
    * FSharp.Core.3

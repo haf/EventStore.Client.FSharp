@@ -31,7 +31,7 @@ let roundtrip_tests =
       timeout = TimeSpan.FromSeconds 8.
       creds   = UserCredentials ("admin", "changeit") }
 
-  let eventstore_impl = with_real_es
+  let eventstore_impl = with_embedded_es
 
   testList "read your writes" [
     testCase "assumption: expected URN" <| fun _ ->

@@ -1,5 +1,5 @@
 EventStore.Client
-FSharp.Core.3
+FSharp.Core
 FSharpx.Core
 Newtonsoft.Json
 FSharp.Data

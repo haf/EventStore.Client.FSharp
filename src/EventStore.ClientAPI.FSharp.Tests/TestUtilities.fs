@@ -56,7 +56,7 @@ let with_embedded_es f =
       printfn "stopped embedded EventStore"
 
 let with_real_es f = f ()
-    
+
 let with_connection factory f =
   factory <| fun _ ->
     let conn =

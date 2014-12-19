@@ -965,7 +965,7 @@ module ConnectionSettings =
     b.LimitReconnectionsTo limit
 
   let keepReconnecting (b : ConnectionSettingsBuilder) =
-    b.KeepRetrying ()
+    b.KeepReconnecting ()
 
   let performOnMasterOnly (b : ConnectionSettingsBuilder) =
     b.PerformOnMasterOnly ()

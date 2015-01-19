@@ -40,6 +40,23 @@ type A(y) =
   member x.X = y
 
 [<Tests>]
+let recorded_event =
+  testList "handling RecordedEvent" [
+
+    testCase "empty RecordedEvent" <| fun _ ->
+      RecordedEvent.Empty |> ignore
+
+    testCase "nonempty RecordedEvent" <| fun _ ->
+      let epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+      let value = Convert.ToInt64((DateTime(2015, 02, 27) - epoch).TotalSeconds)
+      { RecordedEvent.Empty with
+         Created = value * 1000L }
+      |> unwrapRecordedEvent
+      |> fun re ->
+        Assert.Equal("after unwrap", value * 1000L, re.CreatedEpoch)
+    ]
+
+[<Tests>]
 let units =
   testList "eventstore client api unit test" [
     testCase "empty EventData" <| fun _ ->
@@ -49,7 +66,7 @@ let units =
     testCase "EventData from RecordedEvent" <| fun _ ->
       EventData.FromRecordedEvent true RecordedEvent.Empty |> ignore
     testCase "RecordedEvent from EventData" <| fun _ ->
-      RecordedEvent.FromEventData "stream id" 1234u EventData.Empty
+      RecordedEvent.FromEventData "stream id" 1234u 0L EventData.Empty
       |> ignore
     testCase "empty ResolvedEvent" <| fun _ ->
       ResolvedEvent.Empty |> ignore

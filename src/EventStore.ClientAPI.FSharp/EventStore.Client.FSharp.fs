@@ -468,17 +468,19 @@ module Types =
 
   let private ctorRecordedEvent, private setterRecE = reflPkgFor<EventStore.ClientAPI.RecordedEvent> ()
 
-  let private newRecordedEvent (eventId : Guid) (streamId : string) (evtType : string) (number : int) (data : byte array) (metaData : byte array) =
+  let private newRecordedEvent (eventId : Guid) (createdEpoch : int64) (streamId : string) (evtType : string) (number : int) (data : byte array) (metaData : byte array) (isJson : bool) =
     ctorRecordedEvent ()
+    |> setterRecE "CreatedEpoch" createdEpoch
     |> setterRecE "EventStreamId" streamId
     |> setterRecE "EventId" eventId
     |> setterRecE "EventNumber" number
     |> setterRecE "EventType" evtType
     |> setterRecE "Data" data
     |> setterRecE "Metadata" metaData
+    |> setterRecE "IsJson" isJson
 
   let private emptyRecordedEvent =
-    newRecordedEvent Guid.Empty "" "" 0 Empty.ByteArray Empty.ByteArray
+    newRecordedEvent Guid.Empty 0L "" "" 0 Empty.ByteArray Empty.ByteArray false
 
   type EventStore.ClientAPI.RecordedEvent with
     /// Gets an empty recorded event, for interop purposes.
@@ -486,33 +488,40 @@ module Types =
 
   type RecordedEvent =
     { Id       : System.Guid
+      /// ms since epoch
+      Created  : int64
       StreamId : string
       Type     : string
       Metadata : byte array
       Data     : byte array
-      Number   : uint32 }
+      Number   : uint32
+      IsJson   : bool }
     override x.ToString() =
       sprintf "%A" x
-    static member FromEventData streamId number (evt : EventData) =
+    static member FromEventData streamId number created (evt : EventData) =
       { Id       = evt.Id
+        Created  = created
         StreamId = streamId
         Type     = evt.Type
         Metadata = evt.Metadata
         Data     = evt.Data
-        Number   = number }
+        Number   = number
+        IsJson   = evt.IsJson }
 
   let unwrapRecordedEvent (e : RecordedEvent) =
     let number = validUint e.Number
-    newRecordedEvent e.Id e.StreamId e.Type number e.Data e.Metadata
+    newRecordedEvent e.Id e.Created e.StreamId e.Type number e.Data e.Metadata e.IsJson
 
   let wrapRecordedEvent (e : EventStore.ClientAPI.RecordedEvent) =
     if obj.ReferenceEquals(e, null) then invalidArg "e" "e is null"
     { Id       = e.EventId
+      Created  = e.CreatedEpoch
       StreamId = e.EventStreamId
       Type     = e.EventType
       Metadata = e.Metadata
       Data     = e.Data
-      Number   = e.EventNumber |> uint32 }
+      Number   = e.EventNumber |> uint32
+      IsJson   = e.IsJson }
 
   type RecordedEvent with
     static member Empty = EventStore.ClientAPI.RecordedEvent.Empty |> wrapRecordedEvent
@@ -1107,14 +1116,14 @@ module Events =
   type EventData with
     /// Create an EventData from an object and given a natural event name
     /// that is used in the projections
-    static member From<'a> (item : 'a) naturalEventName =
+    static member From<'a> (item : 'a) naturalEventName : Types.EventData =
       let json = to_json item
       { Id       = to_guid json
-      ; Type     = naturalEventName
-      ; Metadata = [ (EventTypeKey, typeof<'a>.ToPartiallyQualifiedName()) ]
+        Type     = naturalEventName
+        Metadata = [ (EventTypeKey, typeof<'a>.ToPartiallyQualifiedName()) ]
                    |> Map.ofList |> to_jsonb
-      ; Data     = Encoding.UTF8.GetBytes json
-      ; IsJson   = true }
+        Data     = Encoding.UTF8.GetBytes json
+        IsJson   = true }
 
 
 type ProjectionsCtx =
@@ -1472,7 +1481,7 @@ module Repo =
     let commitHeaders = [ CommitIdKey, box(Guid.NewGuid ()) ] |> Map.ofList
     let streamId = streamId id
 
-    let prepareData headers (e : 'a) =
+    let prepareData headers (e : 'a) : Types.EventData =
       let headers' = headers |> Map.add EventTypeKey (typeof<'a>.ToPartiallyQualifiedName() |> box)
       let eventType, data = serialise e
       let _, metaData = serialise headers'

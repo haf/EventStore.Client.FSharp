@@ -37,6 +37,11 @@ type ResolveLinksStrategy =
   | ResolveLinks
   | DontResolveLinks
 
+type StreamCheckpoint =
+  | StreamStart
+  /// Exclusive event number to subscribe from. I.e. you will not receive this event.
+  | StreamEventNumber of uint32
+
 module AsyncHelpers =
 
   open System
@@ -275,7 +280,7 @@ type Connection =
   /// Subscribe from, offset exclusive
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L362
   abstract SubscribeToStreamFrom         : StreamId
-                                            * Offset option
+                                            * StreamCheckpoint
                                             // resolveLinks:
                                             * ResolveLinksStrategy
                                             // eventAppeared:
@@ -394,13 +399,16 @@ module TypeExtensions =
                                      Option.noneIsNull subscriptionDropped,
                                      Option.noneIsNull userCredentials)
 
-          member x.SubscribeToStreamFrom (streamId, fromEventNoExclusive, resolveLinks,
+          member x.SubscribeToStreamFrom (streamId, lastCheckpoint, resolveLinks,
                                           eventAppeared, liveProcessingStarted,
                                           subscriptionDropped, userCredentials) =
-            let fromEventNoExclusive = Option.bind (validUint >> Some) fromEventNoExclusive
+            let lastCheckpoint =
+              match lastCheckpoint with
+              | StreamStart -> EventStore.ClientAPI.StreamCheckpoint.StreamStart
+              | StreamEventNumber n -> Nullable<int> (int n)
             let resolveLinks = match resolveLinks with ResolveLinks r -> r
             y.SubscribeToStreamFrom(streamId,
-                                    Option.toNullable fromEventNoExclusive,
+                                    lastCheckpoint,
                                     resolveLinks, eventAppeared,
                                     Option.noneIsNull liveProcessingStarted,
                                     Option.noneIsNull subscriptionDropped,
@@ -912,7 +920,7 @@ module Conn =
   ///
   /// - `c` - event store connection
   /// - `streamId` - stream id to subscribe to
-  /// - `fromEvt` - the offset (uint32) to start reading from
+  /// - `streamCheckpoint` - where to start reading from
   /// - `resolveLinks` - ResolveLinksStategy
   /// - `eventAppeared` - the generic event/message handler
   /// - `liveProcessingStarted` - callback that's called when all historical events
@@ -922,13 +930,13 @@ module Conn =
   ///
   let subscribeFrom (c : Connection)
                     streamId
-                    fromEvt // Offset option
+                    streamCheckpoint
                     resolveLinks
                     eventAppeared
                     liveProcessingStarted // EventStoreCatchUpSubscription -> unit
                     subscriptionDropped
                     userCredentials =
-    c.SubscribeToStreamFrom(streamId, fromEvt, resolveLinks,
+    c.SubscribeToStreamFrom(streamId, streamCheckpoint, resolveLinks,
                             eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                             liveProcessingStarted |> Option.map action,
                             subscriptionDropped |> Option.map action3,

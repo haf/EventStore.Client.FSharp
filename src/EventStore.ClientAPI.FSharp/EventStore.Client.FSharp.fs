@@ -734,9 +734,9 @@ module Types =
   /// <see cref="EventStore.ClientAPI.AllEventsSlice" />
   type AllEventsSlice = 
     { Events        : ResolvedEvent list
-    ; FromPosition  : Position
-    ; NextPosition  : Position
-    ; ReadDirection : ReadDirection }
+      FromPosition  : Position
+      NextPosition  : Position
+      ReadDirection : ReadDirection }
 
   type AllEventsSlice with
     static member Empty = { Events = []; FromPosition = Position(); NextPosition = Position(); ReadDirection = Forward }
@@ -748,9 +748,9 @@ module Types =
       (e.Events |> List.map unwrapResolvedEvent |> List.toArray)
 
   let wrapAllEventsSlice (e : EventStore.ClientAPI.AllEventsSlice) =
-    { Events = e.Events |> List.ofArray |> List.map wrapResolvedEvent
-      FromPosition = e.FromPosition
-      NextPosition = e.FromPosition
+    { Events        = e.Events |> List.ofArray |> List.map wrapResolvedEvent
+      FromPosition  = e.FromPosition
+      NextPosition  = e.FromPosition
       ReadDirection = e.ReadDirection |> wrapReadDirection }
 
 /// Thin F# wrapper on top of EventStore.Client's API. Doesn't
@@ -830,18 +830,18 @@ module Conn =
   /// ReadAllEventsBackwardAsync
   let readAllBack position maxCount resolveLinks userCredentials (c : Connection) =
     c.ReadAllEventsBackwardAsync(position, maxCount, resolveLinks, userCredentials)
-      |> Async.AwaitTask
+    |> Async.AwaitTask
 
   // TODO: Types.AllEventSlice
   /// ReadAllEventsForwardAsync
   let readAll position maxCount resolveLinks userCredentials (c : Connection) =
     c.ReadAllEventsForwardAsync(position, maxCount, resolveLinks, userCredentials)
-      |> Async.AwaitTask
+    |> Async.AwaitTask
 
   /// ReadEventAsync
   let internal readEventRaw stream expectedVersion resolveLinks userCredentials (c : Connection) =
     c.ReadEventAsync(stream, expectedVersion, resolveLinks, userCredentials)
-      |> Async.AwaitTask
+    |> Async.AwaitTask
 
   /// ReadEventAsync
   let readEvent stream expectedVersion resolveLinks userCredentials (c : Connection) =
@@ -851,7 +851,7 @@ module Conn =
   /// ReadStreamEventsBackwardAsync
   let internal readBackRaw streamId start count resolveLinks userCredentials (c : Connection) =
     c.ReadStreamEventsBackwardAsync(streamId, start, count, resolveLinks, userCredentials)
-      |> Async.AwaitTask
+    |> Async.AwaitTask
 
   /// ReadStreamEventsBackwardAsync
   let readBack streamId start count resolveLinks userCredentials (c : Connection) =
@@ -862,7 +862,7 @@ module Conn =
   /// <param name="start">Where to start reading, inclusive</param>
   let internal readRaw streamId start count resolveLinkTos userCredentials (c : Connection) =
     c.ReadStreamEventsForwardAsync(streamId, start, count, resolveLinkTos, userCredentials)
-      |> Async.AwaitTask
+    |> Async.AwaitTask
 
   /// ReadStreamEventsForwardAsync
   /// <param name="start">Where to start reading, inclusive</param>
@@ -873,21 +873,26 @@ module Conn =
   /// SetStreamMetadataAsync
   let setMetadata streamId expectedVersion metadata userCredentials (c : Connection) =
     c.SetStreamMetadataAsync(streamId, expectedVersion, metadata, userCredentials)
-      |> awaitTask
+    |> awaitTask
 
   /// GetStreamMetadataAsync
   let getMetadata streamId userCredentials (c : Connection) =
     c.GetStreamMetadataAsync(streamId, userCredentials)
-      |> Async.AwaitTask
+    |> Async.AwaitTask
 
   /// StartTransactionAsync
   let startTx streamId expectedVersion userCredentials (c : Connection) =
     c.StartTransactionAsync(streamId, expectedVersion, userCredentials) 
-      |> Async.AwaitTask
-      |> canThrowWrongExpectedVersion
+    |> Async.AwaitTask
+    |> canThrowWrongExpectedVersion
 
   /// SubscribeToStream
-  let subscribe (c : Connection) streamId resolveLinks eventAppeared subscriptionDropped userCredentials =
+  let subscribe (c : Connection)
+                streamId
+                resolveLinks
+                eventAppeared
+                subscriptionDropped
+                userCredentials =
     c.SubscribeToStreamAsync(streamId, resolveLinks,
                              eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                              subscriptionDropped |> Option.map action3,
@@ -895,8 +900,25 @@ module Conn =
     |> Async.AwaitTask
 
   /// SubscribeToStreamFrom
-  let subscribeFrom (c : Connection) streamId fromEvt resolveLinks eventAppeared
-    liveProcessingStarted subscriptionDropped userCredentials =
+  ///
+  /// - `c` - event store connection
+  /// - `streamId` - stream id to subscribe to
+  /// - `fromEvt` - the offset (uint32) to start reading from
+  /// - `resolveLinks` - ResolveLinksStategy
+  /// - `eventAppeared` - the generic event/message handler
+  /// - `liveProcessingStarted` - callback that's called when all historical events
+  ///   have been processed and the subscription switches to 'live' mode
+  /// - `subscriptionDropped` - for handling the drop of a subscription
+  /// - `userCredentials` - user credentials to use for connecting to ES
+  ///
+  let subscribeFrom (c : Connection)
+                    streamId
+                    fromEvt // Offset option
+                    resolveLinks
+                    eventAppeared
+                    liveProcessingStarted // EventStoreCatchUpSubscription -> unit
+                    subscriptionDropped
+                    userCredentials =
     c.SubscribeToStreamFrom(streamId, fromEvt, resolveLinks,
                             eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                             liveProcessingStarted |> Option.map action,
@@ -904,12 +926,16 @@ module Conn =
                             userCredentials)
 
   /// SubscribeToAll
-  let subscribeAll (c : Connection) resolveLinks eventAppeared subscriptionDropped userCredentials =
+  let subscribeAll (c : Connection)
+                   resolveLinks
+                   eventAppeared
+                   subscriptionDropped
+                   userCredentials =
     c.SubscribeToAllAsync(resolveLinks,
                           eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                           subscriptionDropped |> Option.map action3,
                           userCredentials)
-      |> Async.AwaitTask
+    |> Async.AwaitTask
 
   /// SubscribeToAllFrom
   let subscribeAllFrom (c : Connection) fromPos resolveLinks eventAppeared 

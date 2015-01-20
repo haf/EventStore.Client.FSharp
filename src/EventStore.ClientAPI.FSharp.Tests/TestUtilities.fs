@@ -60,8 +60,11 @@ let with_real_es f = f ()
 let with_connection factory f =
   factory <| fun _ ->
     let conn =
+      let logger, internal_logger =
+        (!lm).Value.GetLogger("EventStore"),
+        (!lm).Value.GetLogger("EventStore.Internal")
       ConnectionSettings.configureStart()
-      |> ConnectionSettings.useCustomLogger (LogaryLogger((!lm).Value.GetLogger("EventStore")))
+      |> ConnectionSettings.useCustomLogger (EventStoreAdapter(logger, internal_logger))
       |> ConnectionSettings.configureEnd (IPEndPoint(IPAddress.Loopback, 1113))
     conn |> Conn.connect |> Async.RunSynchronously
     try f conn

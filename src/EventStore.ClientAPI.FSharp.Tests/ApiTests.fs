@@ -70,6 +70,9 @@ let units =
       |> ignore
     testCase "empty ResolvedEvent" <| fun _ ->
       ResolvedEvent.Empty |> ignore
+    testCase "empty ResolvedEvent" <| fun _ ->
+      ResolvedEvent.Empty.OriginalEventNumber |> ignore
+
     testCase "empty EventReadResult" <| fun _ ->
       EventReadResult.Empty |> ignore
     testCase "empty StreamEventsSlice" <| fun _ ->

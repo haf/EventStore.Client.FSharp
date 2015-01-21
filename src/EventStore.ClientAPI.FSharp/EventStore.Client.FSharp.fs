@@ -567,20 +567,34 @@ module Types =
 
   /// For docs <see cref="EventStore.ClientAPI.ResolvedEvent" />
   type ResolvedEvent =
-    { Event               : RecordedEvent
-      Link                : RecordedEvent option
-      OriginalPosition    : Position option }
+    { Event            : RecordedEvent
+      Link             : RecordedEvent option
+      OriginalPosition : Position option }
+    /// By default takes the Link-recorded event, or if there's no link,
+    /// takes the event itself
+    member x.OriginalEvent =
+      x.Link |> Option.fold (fun s t -> t) x.Event
+    /// By default takes the Link-recorded event stream id, or if there's
+    /// no link, takes the event's stream id itself
+    member x.OriginalStreamId =
+      x.OriginalEvent.StreamId
+    /// By default takes the Link-recorded event number, or otherwise, if
+    /// there's no link, takes the event's actual number.
+    member x.OriginalEventNumber =
+      x.OriginalEvent.Number
     override x.ToString() =
       sprintf "%A" x
 
   let unwrapResolvedEvent (e : ResolvedEvent) =
-    newResolvedEvent (e.Event |> unwrapRecordedEvent) (e.Link |> Option.fold (fun s -> unwrapRecordedEvent) null) (Option.toNullable e.OriginalPosition)
+    newResolvedEvent (e.Event |> unwrapRecordedEvent)
+                     (e.Link |> Option.fold (fun s -> unwrapRecordedEvent) null)
+                     (Option.toNullable e.OriginalPosition)
 
   /// Convert a <see cref="EventStore.ClientAPI.ResolvedEveRent" /> to a
   /// DataModel.EventRef.
   let wrapResolvedEvent (e : EventStore.ClientAPI.ResolvedEvent) =
     { Event            = e.Event |> wrapRecordedEvent
-      Link             = None // e.Link  |> Option.foldObj (fun s -> wrapRecordedEvent) None
+      Link             = e.Link  |> Option.foldObj (fun s -> wrapRecordedEvent) None
       OriginalPosition = e.OriginalPosition |> Option.fromNullable }
 
   type ResolvedEvent with

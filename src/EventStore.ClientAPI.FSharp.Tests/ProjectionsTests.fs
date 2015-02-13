@@ -19,7 +19,7 @@ open EventStore.ClientAPI.AsyncHelpers
 open EventStore.ClientAPI.SystemData
 open EventStore.ClientAPI.Common.Log
 
-open Intelliplan.JsonNet
+open Newtonsoft.Json.FSharp
 
 let run_t (t : Task) = t |> Async.AwaitTask |> Async.RunSynchronously
 

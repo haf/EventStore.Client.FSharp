@@ -20,7 +20,7 @@ open NLog.Targets
 
 let lm : (Logary.LogManager option ref) = ref None
 
-let conf_nlog () =
+let confNlog () =
   let config = match LogManager.Configuration with | null -> new LoggingConfiguration () | cfg -> cfg
   use ct = new ConsoleTarget()
   config.AddTarget("console", ct)
@@ -30,8 +30,8 @@ let conf_nlog () =
   LogManager.Configuration <- config
 
 /// Execute f in a context where you can bind to the event store
-let with_embedded_es f =
-  conf_nlog ()
+let withEmbeddedEs f =
+  confNlog ()
   let node = EmbeddedVNodeBuilder.AsSingleNode()
                                   .OnDefaultEndpoints()
                                   .RunInMemory()
@@ -55,23 +55,23 @@ let with_embedded_es f =
     else
       printfn "stopped embedded EventStore"
 
-let with_real_es f = f ()
+let withRealEs f = f ()
 
-let with_connection factory f =
+let withConnection factory f =
   factory <| fun _ ->
     let conn =
-      let logger, internal_logger =
+      let logger, internalLogger =
         (!lm).Value.GetLogger("EventStore"),
         (!lm).Value.GetLogger("EventStore.Internal")
       ConnectionSettings.configureStart()
-      |> ConnectionSettings.useCustomLogger (EventStoreAdapter(logger, internal_logger))
+      |> ConnectionSettings.useCustomLogger (EventStoreAdapter(logger, internalLogger))
       |> ConnectionSettings.configureEnd (IPEndPoint(IPAddress.Loopback, 1113))
     conn |> Conn.connect |> Async.RunSynchronously
     try f conn
     finally conn |> Conn.close
 
-let with_connection' f =
-  with_connection with_embedded_es f
+let withEmbeddedConnection f =
+  withConnection withEmbeddedEs f
 
 let resource name =
   let assembly = Assembly.GetExecutingAssembly ()

@@ -1122,10 +1122,10 @@ module Events =
 
   open EventStore.ClientAPI
 
-  let to_json = Newtonsoft.Json.JsonConvert.SerializeObject
-  let to_jsonb : obj -> byte[] = (Encoding.UTF8.GetBytes : string -> byte[]) << Newtonsoft.Json.JsonConvert.SerializeObject
+  let toJson = Newtonsoft.Json.JsonConvert.SerializeObject
+  let toJsonB : obj -> byte[] = (Encoding.UTF8.GetBytes : string -> byte[]) << Newtonsoft.Json.JsonConvert.SerializeObject
 
-  let to_guid (s : string) : Guid =
+  let toGuid (s : string) : Guid =
     use sha = HashAlgorithm.Create "SHA1"
     let sha1 = sha.ComputeHash : byte[] -> byte[]
     let guid = fun (bs : byte []) -> Guid bs
@@ -1139,11 +1139,11 @@ module Events =
     /// Create an EventData from an object and given a natural event name
     /// that is used in the projections
     static member From<'a> (item : 'a) naturalEventName : Types.EventData =
-      let json = to_json item
-      { Id       = to_guid json
+      let json = toJson item
+      { Id       = toGuid json
         Type     = naturalEventName
         Metadata = [ (EventTypeKey, typeof<'a>.ToPartiallyQualifiedName()) ]
-                   |> Map.ofList |> to_jsonb
+                   |> Map.ofList |> toJsonB
         Data     = Encoding.UTF8.GetBytes json
         IsJson   = true }
 
@@ -1177,26 +1177,26 @@ module Projections =
         return ()
     }
 
-  let private mk_manager ctx =
+  let private mkManager ctx =
     ProjectionsManager(ctx.logger, ctx.ep, ctx.timeout)
 
-  let rec private handle_http_codes (logger : ILogger) v =
+  let rec private handleHttpCodes (logger : ILogger) v =
     async {
       try
         let! status = v
         return Some status
-      with e -> return! on_http_error logger v e e
+      with e -> return! onHttpError logger v e e
     }
-  and on_http_error logger v orig_ex (ex : exn) =
+  and onHttpError logger v orig_ex (ex : exn) =
     async {
       match ex with
       | :? ProjectionCommandFailedException as pcfe
           when pcfe.Message.Contains "404 (Not Found)" ->
         return None
       | :? AggregateException as ae ->
-        return! on_http_error logger v orig_ex (ae.InnerException)
+        return! onHttpError logger v orig_ex (ae.InnerException)
       | :? WebException as we when we.Message.Contains "Aborted" ->
-        return! handle_http_codes logger v
+        return! handleHttpCodes logger v
       | e ->
         logger.Error (sprintf "unhandled exception from handle_http_codes:\n%O" e)
         return raise (Exception("unhandled exception from handle_http_codes", e))
@@ -1204,86 +1204,86 @@ module Projections =
 
 
   let abort ctx name =
-    let pm = mk_manager ctx
+    let pm = mkManager ctx
     pm.AbortAsync(name, ctx.creds) |> Async.AwaitTask
 
   let enable ctx name =
-    let pm = mk_manager ctx
+    let pm = mkManager ctx
     pm.EnableAsync(name, ctx.creds) |> Async.AwaitTask
 
   let create_continuous ctx name query =
-    let pm = mk_manager ctx
+    let pm = mkManager ctx
     pm.CreateContinuousAsync(name, query, ctx.creds) |> Async.AwaitTask
 
   let create_one_time ctx query =
-    let pm = mk_manager ctx
+    let pm = mkManager ctx
     pm.CreateOneTimeAsync(query, ctx.creds) |> Async.AwaitTask
 
   let create_transient ctx name query =
-    let pm = mk_manager ctx
+    let pm = mkManager ctx
     pm.CreateTransientAsync(name, query, ctx.creds) |> Async.AwaitTask
 
   let delete ctx name =
-    let pm = mk_manager ctx
+    let pm = mkManager ctx
     pm.DeleteAsync(name, ctx.creds)
     |> Async.AwaitTask
-    |> handle_http_codes ctx.logger
+    |> handleHttpCodes ctx.logger
     |> Async.Ignore
 
   let disable ctx name =
-    let pm = mk_manager ctx
+    let pm = mkManager ctx
     ``404 is just fine`` <| fun _ ->
       pm.DisableAsync(name, ctx.creds)
       |> Async.AwaitTask
 
   let get_query ctx name =
-    let pm = mk_manager ctx
+    let pm = mkManager ctx
     pm.GetQueryAsync(name, ctx.creds) |> Async.AwaitTask
 
-  let get_state ctx name =
-    let pm = mk_manager ctx
+  let getState ctx name =
+    let pm = mkManager ctx
     pm.GetStateAsync(name, ctx.creds)
     |> Async.AwaitTask
-    |> handle_http_codes ctx.logger
+    |> handleHttpCodes ctx.logger
 
-  let get_statistics ctx name =
-    let pm = mk_manager ctx
+  let getStatistics ctx name =
+    let pm = mkManager ctx
     pm.GetStatisticsAsync(name, ctx.creds) |> Async.AwaitTask
 
   // reflection error with following line:
   type Status = JsonProvider<"get_status_sample.json">
 
-  let get_status ctx name =
-    let pm = mk_manager ctx
+  let getStatus ctx name =
+    let pm = mkManager ctx
     async {
       let! res =
         pm.GetStatusAsync(name, ctx.creds)
         |> Async.AwaitTask
-        |> handle_http_codes ctx.logger
+        |> handleHttpCodes ctx.logger
       return res |> Option.map Status.Parse
     }
 
-  let list_all ctx =
-    let pm = mk_manager ctx
+  let listAll ctx =
+    let pm = mkManager ctx
     pm.ListAllAsync ctx.creds |> Async.AwaitTask
 
-  let list_continuous ctx =
-    let pm = mk_manager ctx
+  let listContinuous ctx =
+    let pm = mkManager ctx
     pm.ListContinuousAsync ctx.creds |> Async.AwaitTask
 
-  let list_one_time ctx =
-    let pm = mk_manager ctx
+  let listOneTime ctx =
+    let pm = mkManager ctx
     pm.ListOneTimeAsync ctx.creds |> Async.AwaitTask
 
-  let update_query ctx name query =
-    let pm = mk_manager ctx
+  let updateQuery ctx name query =
+    let pm = mkManager ctx
     pm.UpdateQueryAsync(name, query, ctx.creds) |> Async.AwaitTask
 
-  let setup_aggregate_projections ctx  =
+  let setupAggregateProjections ctx  =
     let streams = [ "$by_category"; "$stream_by_category" ]
     async {
       for stream in streams do
-        let! status = stream |> get_status ctx
+        let! status = stream |> getStatus ctx
         match status with
         | None ->
           do! stream |> enable ctx
@@ -1293,33 +1293,33 @@ module Projections =
         | _ -> return ()
     }
 
-  let rec wait_for_init ctx (f : unit -> Async<_>) = async {
-    let pm = mk_manager ctx
+  let rec waitForInit ctx (f : unit -> Async<_>) = async {
+    let pm = mkManager ctx
     try
-      do! setup_aggregate_projections ctx
+      do! setupAggregateProjections ctx
       return! f ()
-    with e -> return! on_error ctx f e e
+    with e -> return! onError ctx f e e
     }
-  and on_error ctx f orig_err err = async {
+  and onError ctx f origErr err = async {
     match err with
     | :? AggregateException as ae -> // unwrap it
-      return! on_error ctx f orig_err (ae.InnerException)
+      return! onError ctx f origErr (ae.InnerException)
     | :? ProjectionCommandFailedException as e
         when e.Message.Contains("Not yet ready.") ->
       ctx.logger.Info "... waiting 1000 ms for server to get ready ..."
       do! Async.Sleep 1000
-      return! wait_for_init ctx f
+      return! waitForInit ctx f
     | e when e.InnerException <> null ->
-      return! on_error ctx f orig_err (e.InnerException)
+      return! onError ctx f origErr (e.InnerException)
     | e ->
-      raise (Exception("exception in wait_for_init", orig_err))
+      raise (Exception("exception in wait_for_init", origErr))
     }
  
-  let ensure_continuous ctx name query =
-    let pm = mk_manager ctx
+  let ensureContinuous ctx name query =
+    let pm = mkManager ctx
     async {
       ctx.logger.Debug "calling get_status"
-      let! status = get_status ctx name
+      let! status = getStatus ctx name
       match status with
       | None -> 
         ctx.logger.Debug "calling create_continuous from 404 case"

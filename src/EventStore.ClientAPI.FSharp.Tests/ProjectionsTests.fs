@@ -31,7 +31,7 @@ let roundtrip_tests =
       timeout = TimeSpan.FromSeconds 8.
       creds   = UserCredentials ("admin", "changeit") }
 
-  let eventstore_impl = with_embedded_es
+  let eventStoreImpl = withEmbeddedEs
 
   testList "read your writes" [
     testCase "assumption: expected URN" <| fun _ ->
@@ -47,7 +47,7 @@ let roundtrip_tests =
 //        |> Async.RunSynchronously
 
     testCase "cmds: can execute against Aggregate" <| fun _ ->
-      with_connection eventstore_impl <| fun conn ->
+      withConnection eventStoreImpl <| fun conn ->
         let id = (sprintf "programmers-%s" (Guid.NewGuid().ToString().Replace("-", "")))
         id |> Projections.delete proj_ctx |> Async.RunSynchronously
         let evts =

@@ -93,18 +93,18 @@ let units =
                       [||], subject)
     testCase "hash a string into a guid" <| fun _ ->
       let subject = "Hello World, of course!"
-      let guid    = to_guid subject
+      let guid    = toGuid subject
       Assert.NotEqual("not empty", Guid.Empty, guid)
     testCase "can create EventData from some object" <| fun _ ->
       let data = A 42
       let subject = EventData.From data "EventA"
       Assert.Equal("should have id from serialized object",
-                   data |> to_json |> to_guid,
+                   data |> toJson |> toGuid,
                    subject.Id)
       Assert.Equal("should have type that was passed",
                    "EventA", subject.Type)
       Assert.Equal("should have json serialized data",
-                   data |> to_jsonb,
+                   data |> toJsonB,
                    subject.Data)
       Assert.Equal("should say it's JSON",
                    true, subject.IsJson)

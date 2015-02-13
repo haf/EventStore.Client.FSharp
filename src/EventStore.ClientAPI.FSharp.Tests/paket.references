@@ -1,8 +1,6 @@
 Fuchu
 protobuf-net
-EventStore.Client
 EventStore.Client.Embedded
-Intelliplan.JsonNet
 Intelliplan.Logary.Adapters.EventStore
 FSharpx.Core
 NLog

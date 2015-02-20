@@ -1336,21 +1336,21 @@ module Write =
   [<Literal>]
   let Description = "A module that encapsulates write patterns against the event store"
 
+/// Represents an aggregate.
+type Aggregate<'TState, 'TCommand, 'TEvent> =
+  { /// An initial state value.
+    zero : 'TState
+    /// Applies an event to a state returning a new state.
+    apply : 'TState -> 'TEvent -> 'TState
+    /// Executes a command on a state yielding one or many events. Does not yield
+    /// all events that the aggregate is based on.
+    exec : 'TState -> 'TCommand -> 'TEvent list }
+
 /// Aggregate framework.
-[<RequireQualifiedAccess>]
+[<RequireQualifiedAccess; CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Aggregate =
 
   open FSharp.Control
-
-  /// Represents an aggregate.
-  type Aggregate<'TState, 'TCommand, 'TEvent> =
-    { /// An initial state value.
-      zero : 'TState
-      /// Applies an event to a state returning a new state.
-      apply : 'TState -> 'TEvent -> 'TState
-      /// Executes a command on a state yielding one or many events. Does not yield
-      /// all events that the aggregate is based on.
-      exec : 'TState -> 'TCommand -> 'TEvent list }
 
   /// An aggregate id
   type Id = string

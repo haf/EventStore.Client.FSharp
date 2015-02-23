@@ -41,16 +41,3 @@ let apply state = function
   | MetAHerdOfYaksAndShavedThemALL -> NormalState
   | LostAnHourInVimVersusEmacsWar  -> Bipolar
   | LostAWeekFromSegfault          -> MicroManaged
-
-let aggregate =
-  { Aggregate.zero  = NormalState
-    Aggregate.apply = apply
-    Aggregate.exec  = exec }
-
-let write conn id version cmd =
-  let load, commit = Serialisation.serialiser' ||> Repo.make conn
-  let handler = Aggregate.makeHandler aggregate load commit
-  async {
-    let! events, write = handler (id, version) cmd
-    do! write
-    return events }

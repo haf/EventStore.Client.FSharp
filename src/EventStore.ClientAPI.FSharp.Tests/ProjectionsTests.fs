@@ -46,7 +46,7 @@ let roundtrip_tests =
 //          }
 //        |> Async.RunSynchronously
 
-    testCase "cmds: can execute against Aggregate" <| fun _ ->
+    (*testCase "cmds: can execute against Aggregate" <| fun _ ->
       withConnection eventStoreImpl <| fun conn ->
         let id = (sprintf "programmers-%s" (Guid.NewGuid().ToString().Replace("-", "")))
         id |> Projections.delete proj_ctx |> Async.RunSynchronously
@@ -63,7 +63,7 @@ let roundtrip_tests =
           PublishNuget
           |> LifeOfAProgrammer.write conn id (Specific 1u)
           |> Async.RunSynchronously
-        ()
+        ()*)
 //
 //    testCase "projections: init/update/ensure" <| fun _ ->
 //      let ensure_projections () =

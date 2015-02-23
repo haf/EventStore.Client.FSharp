@@ -43,7 +43,6 @@
     <Compile Include="SampleDomain.fs" />
     <EmbeddedResource Include="IsHeAManagerYet.js" />
     <EmbeddedResource Include="EventCounting.js" />
-    <Compile Include="MatchingExpectedVersions.fs" />
     <Compile Include="ProjectionsTests.fs" />
     <Compile Include="RepoTests.fs" />
     <Compile Include="ApiTests.fs" />
@@ -191,7 +190,6 @@
   <ItemGroup>
     <Reference Include="Fuchu">
       <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
-      <Private>True</Private>
       <Paket>True</Paket>
     </Reference>
   </ItemGroup>

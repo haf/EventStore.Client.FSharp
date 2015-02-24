@@ -33,9 +33,6 @@ let utilities =
                    2, f ())
     ]
 
-
-open Events
-
 type A(y) =
   member x.X = y
 
@@ -72,18 +69,12 @@ let units =
       ResolvedEvent.Empty |> ignore
     testCase "empty ResolvedEvent" <| fun _ ->
       ResolvedEvent.Empty.OriginalEventNumber |> ignore
-
     testCase "empty EventReadResult" <| fun _ ->
       EventReadResult.Empty |> ignore
     testCase "empty StreamEventsSlice" <| fun _ ->
       StreamEventsSlice.Empty |> ignore
     testCase "empty AllEventsSlice" <| fun _ ->
       AllEventsSlice.Empty |> ignore
-    testCase "clr type name from type" <| fun _ ->
-      let t = typeof<A>
-      Assert.Equal("should eq module plus type name",
-                   "ApiTests+A, EventStore.ClientAPI.FSharp.Tests",
-                   t.ToPartiallyQualifiedName ())
     testCase "compute sha1 on empty array" <| fun _ ->
       use sha = SHA1.Create()
       Assert.Equal("160 bits size", 160, sha.HashSize)
@@ -91,22 +82,5 @@ let units =
       Assert.Equal("should be 160 bits", 160, subject.Length * 8)
       Assert.NotEqual("hash of empty array is not zero(oes)",
                       [||], subject)
-    testCase "hash a string into a guid" <| fun _ ->
-      let subject = "Hello World, of course!"
-      let guid    = toGuid subject
-      Assert.NotEqual("not empty", Guid.Empty, guid)
-    testCase "can create EventData from some object" <| fun _ ->
-      let data = A 42
-      let subject = EventData.From data "EventA"
-      Assert.Equal("should have id from serialized object",
-                   data |> toJson |> toGuid,
-                   subject.Id)
-      Assert.Equal("should have type that was passed",
-                   "EventA", subject.Type)
-      Assert.Equal("should have json serialized data",
-                   data |> toJsonB,
-                   subject.Data)
-      Assert.Equal("should say it's JSON",
-                   true, subject.IsJson)
 
   ]

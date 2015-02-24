@@ -1088,65 +1088,6 @@ module Tx =
   let write (tx : EventStoreTransaction) (events : Types.EventData list) =
     writeRaw tx (events |> List.map unwrapEventData)
 
-module Events =
-  let [<Literal>] EventTypeKey = "EventClrTypeName"
-
-  open System.Text
-
-  type Type with
-    /// Convert the type to a partially qualified name that also contains
-    /// the types of the type parameters (if the type is generic).
-    /// Throws argument exception if the type is an open generic type.
-    member t.ToPartiallyQualifiedName () =
-      if t.IsGenericTypeDefinition then invalidArg "open generic types are not allwed" "t"
-      let sb = new StringBuilder()
-      let append = (fun s -> sb.Append(s) |> ignore) : string -> unit
-
-      append t.FullName
-
-      if t.IsGenericType then
-        append "["
-        let args = t.GetGenericArguments() |> Array.map (fun g -> sprintf "[%s]" <| g.ToPartiallyQualifiedName())
-        append <| String.Join(", ", args)
-        append "]"
-
-      append ", "
-      append <| t.Assembly.GetName().Name
-
-      sb.ToString()
-
-  open System
-  open System.Net
-  open System.Security.Cryptography
-  open System.Text
-
-  open EventStore.ClientAPI
-
-  let toJson = Newtonsoft.Json.JsonConvert.SerializeObject
-  let toJsonB : obj -> byte[] = (Encoding.UTF8.GetBytes : string -> byte[]) << Newtonsoft.Json.JsonConvert.SerializeObject
-
-  let toGuid (s : string) : Guid =
-    use sha = HashAlgorithm.Create "SHA1"
-    let sha1 = sha.ComputeHash : byte[] -> byte[]
-    let guid = fun (bs : byte []) -> Guid bs
-    let truncate bs =
-      let bs' = Array.zeroCreate<byte> 16
-      Array.blit bs 0 bs' 0 16
-      bs'
-    s |> (Encoding.UTF8.GetBytes >> sha1 >> truncate >> guid)
-
-  type EventData with
-    /// Create an EventData from an object and given a natural event name
-    /// that is used in the projections
-    static member From<'a> (item : 'a) naturalEventName : Types.EventData =
-      let json = toJson item
-      { Id       = toGuid json
-        Type     = naturalEventName
-        Metadata = [ (EventTypeKey, typeof<'a>.ToPartiallyQualifiedName()) ]
-                   |> Map.ofList |> toJsonB
-        Data     = Encoding.UTF8.GetBytes json
-        IsJson   = true }
-
 
 type ProjectionsCtx =
   { logger  : ILogger

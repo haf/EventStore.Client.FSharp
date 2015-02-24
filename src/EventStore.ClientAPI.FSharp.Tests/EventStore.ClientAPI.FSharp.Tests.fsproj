@@ -30,30 +30,22 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\EventStore.ClientAPI.FSharp.Tests.XML</DocumentationFile>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AssemblyVersionInfo.fs">
-    </Compile>
-    <Compile Include="TestUtilities.fs" />
-    <Compile Include="SampleDomain.fs" />
-    <EmbeddedResource Include="IsHeAManagerYet.js" />
-    <EmbeddedResource Include="EventCounting.js" />
-    <Compile Include="ProjectionsTests.fs" />
-    <Compile Include="RepoTests.fs" />
-    <Compile Include="ApiTests.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="Script.fsx" />
-    <None Include="paket.references" />
-  </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '11.0'">
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="..\packages\EventStore.Client.Embedded.3.0.1\build\EventStore.Client.Embedded.targets" Condition="Exists('..\packages\EventStore.Client.Embedded.3.0.1\build\EventStore.Client.Embedded.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -62,12 +54,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <ProjectReference Include="..\EventStore.ClientAPI.FSharp\EventStore.ClientAPI.FSharp.fsproj">
-      <Project>{AFF2ACA3-0084-4A40-96F9-F0886601A925}</Project>
-      <Name>EventStore.ClientAPI.FSharp</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Choose>
     <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3')) Or ($(TargetFrameworkIdentifier) == 'MonoAndroid') Or ($(TargetFrameworkIdentifier) == 'MonoTouch')">
       <ItemGroup>
@@ -187,12 +173,6 @@
       </ItemGroup>
     </When>
   </Choose>
-  <ItemGroup>
-    <Reference Include="Fuchu">
-      <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
-      <Paket>True</Paket>
-    </Reference>
-  </ItemGroup>
   <Choose>
     <When Condition="($(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.0' Or $(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3')) Or ($(TargetFrameworkIdentifier) == 'MonoAndroid') Or ($(TargetFrameworkIdentifier) == 'MonoTouch')">
       <ItemGroup>
@@ -434,4 +414,33 @@
       </ItemGroup>
     </When>
   </Choose>
+  <ItemGroup>
+    <Compile Include="AssemblyVersionInfo.fs">
+    </Compile>
+    <Compile Include="TestUtilities.fs" />
+    <Compile Include="SampleDomain.fs" />
+    <EmbeddedResource Include="IsHeAManagerYet.js" />
+    <EmbeddedResource Include="EventCounting.js" />
+    <Compile Include="ProjectionsTests.fs" />
+    <Compile Include="RepoTests.fs" />
+    <Compile Include="ApiTests.fs" />
+    <Compile Include="Program.fs" />
+    <None Include="Script.fsx" />
+    <None Include="paket.references" />
+    <Content Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\EventStore.ClientAPI.FSharp\EventStore.ClientAPI.FSharp.fsproj">
+      <Project>{AFF2ACA3-0084-4A40-96F9-F0886601A925}</Project>
+      <Name>EventStore.ClientAPI.FSharp</Name>
+    </ProjectReference>
+    <Reference Include="Fuchu">
+      <HintPath>..\..\packages\Fuchu\lib\Fuchu.dll</HintPath>
+      <Paket>True</Paket>
+    </Reference>
+  </ItemGroup>
 </Project>

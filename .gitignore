@@ -5,3 +5,4 @@ packages/
 build/
 AssemblyVersionInfo.fs
 EventStore.Client.FSharp.userprefs
+*.suo

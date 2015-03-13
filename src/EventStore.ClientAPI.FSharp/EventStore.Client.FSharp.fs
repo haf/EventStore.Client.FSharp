@@ -176,7 +176,9 @@ open System.Net
 open System.Threading.Tasks
 
 type Count = uint32
-type Offset = uint32
+type Offset =
+    | Specific of uint32
+    | LastInStream
 type StreamId = string
 type TransactionId = int64
 
@@ -366,14 +368,22 @@ module TypeExtensions =
                                Option.noneIsNull userCredentials)
 
           member x.ReadStreamEventsBackwardAsync (streamId, start, count, resolveLinks, userCredentials) =
-            let start, count = validUint start, validUint count
-            y.ReadStreamEventsBackwardAsync(streamId, start, count,
+            let count = validUint count
+            let startEvent =
+                match start with
+                | Specific i -> validUint i
+                | LastInStream -> -1
+            y.ReadStreamEventsBackwardAsync(streamId, startEvent, count,
                                             (match resolveLinks with ResolveLinks r -> r),
                                             Option.noneIsNull userCredentials)
 
           member x.ReadStreamEventsForwardAsync (streamId, start, count, resolveLinks, userCredentials) =
-            let start, count = validUint start, validUint count
-            y.ReadStreamEventsForwardAsync(streamId, start, count,
+            let count = validUint count
+            let startEvent =
+                match start with
+                | Specific i -> validUint i
+                | LastInStream -> -1
+            y.ReadStreamEventsForwardAsync(streamId, startEvent, count,
                                            (match resolveLinks with ResolveLinks r -> r),
                                            Option.noneIsNull userCredentials)
 

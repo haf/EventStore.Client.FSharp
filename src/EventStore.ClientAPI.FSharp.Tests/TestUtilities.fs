@@ -18,6 +18,8 @@ open NLog
 open NLog.Config
 open NLog.Targets
 
+open Logary
+
 let lm : (Logary.LogManager option ref) = ref None
 
 let confNlog () =

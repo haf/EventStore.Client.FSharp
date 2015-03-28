@@ -5,4 +5,5 @@ packages/
 build/
 AssemblyVersionInfo.fs
 EventStore.Client.FSharp.userprefs
+paket.exe
 *.suo

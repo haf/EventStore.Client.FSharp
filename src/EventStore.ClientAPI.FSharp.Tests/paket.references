@@ -1,6 +1,7 @@
 Fuchu
 protobuf-net
-EventStore.Client.Embedded
-Intelliplan.Logary.Adapters.EventStore
-FSharpx.Core
 NLog
+Logary
+Logary.Adapters.EventStore
+EventStore.Client.PreRelease
+EventStore.Client.Embedded.PreRelease

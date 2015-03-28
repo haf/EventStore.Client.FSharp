@@ -1112,13 +1112,15 @@ type ProjectionsCtx =
 
 module Projections =
 
+  open Chiron
+  open Chiron.Operators
+
   open Helpers
   open AsyncHelpers
 
   open EventStore.ClientAPI
+  open EventStore.ClientAPI.Projections
   open EventStore.ClientAPI.Exceptions
-
-  open FSharp.Data
 
   [<Literal>]
   let Description = "A module that encapsulates read patterns against the event store"
@@ -1157,7 +1159,6 @@ module Projections =
         logger.Error (sprintf "unhandled exception from handle_http_codes:\n%O" e)
         return raise (Exception("unhandled exception from handle_http_codes", e))
     }
-
 
   let abort ctx name =
     let pm = mkManager ctx
@@ -1206,8 +1207,113 @@ module Projections =
     let pm = mkManager ctx
     pm.GetStatisticsAsync(name, ctx.creds) |> Async.AwaitTask
 
-  // reflection error with following line:
-  type Status = JsonProvider<"get_status_sample.json">
+  // Booh yah!
+  type Status =
+    { coreProcessingTime : uint32
+      version : uint32
+      epoch : int
+      effectiveName : string
+      writesInProgress : uint16
+      readsInProgress  : uint16
+      partitionsCached : uint16
+      status : string
+      stateReason : string
+      name : string
+      mode : string
+      position : string
+      progress : float
+      lastCheckpoint : string
+      eventsProcessedAfterRestart : uint32
+      statusUrl : Uri
+      stateUrl : Uri
+      resultUrl : Uri
+      queryUrl : Uri
+      enableCommandUrl : Uri
+      disableCommandUrl : Uri
+      checkpointStatus : string
+      bufferedEvents : uint32
+      writePendingEventsBeforeCheckpoint : uint32
+      writePendingEventsAfterCheckpoint : uint32
+    }
+    static member FromJson (_ : Status) =
+      (fun cpt ver ep effName wip rip pc st sReas nm mo pos prog lc epar statU stateU resU qU ecU dcU cStat bE wpebc wpeac ->
+        { coreProcessingTime = cpt
+          version = ver
+          epoch = ep
+          effectiveName = effName
+          writesInProgress = wip
+          readsInProgress  = rip
+          partitionsCached = pc
+          status = st
+          stateReason = sReas
+          name = nm
+          mode = mo
+          position = pos
+          progress = prog
+          lastCheckpoint = lc
+          eventsProcessedAfterRestart = epar
+          statusUrl = Uri statU
+          stateUrl = Uri stateU
+          resultUrl = Uri resU
+          queryUrl = Uri qU
+          enableCommandUrl = Uri ecU
+          disableCommandUrl = Uri dcU
+          checkpointStatus = cStat
+          bufferedEvents = bE
+          writePendingEventsBeforeCheckpoint = wpebc
+          writePendingEventsAfterCheckpoint = wpeac })
+      <!> Json.read "coreProcessingTime"
+      <*> Json.read "version"
+      <*> Json.read "epoch"
+      <*> Json.read "effectiveName"
+      <*> Json.read "writesInProgress"
+      <*> Json.read "readsInProgress"
+      <*> Json.read "partitionsCached"
+      <*> Json.read "status"
+      <*> Json.read "stateReason"
+      <*> Json.read "name"
+      <*> Json.read "mode"
+      <*> Json.read "position"
+      <*> Json.read "progress"
+      <*> Json.read "lastCheckpoint"
+      <*> Json.read "eventsProcessedAfterRestart"
+      <*> Json.read "statusUrl"
+      <*> Json.read "stateUrl"
+      <*> Json.read "resultUrl"
+      <*> Json.read "queryUrl"
+      <*> Json.read "enableCommandUrl"
+      <*> Json.read "disableCommandUrl"
+      <*> Json.read "checkpointStatus"
+      <*> Json.read "bufferedEvents"
+      <*> Json.read "writePendingEventsBeforeCheckpoint"
+      <*> Json.read "writePendingEventsAfterCheckpoint"
+
+    static member ToJson (s : Status) =
+      Json.write "coreProcessingTime" s.coreProcessingTime
+      *> Json.write "version" s.version
+      *> Json.write "epoch" s.epoch
+      *> Json.write "effectiveName" s.effectiveName
+      *> Json.write "writesInProgress" s.writesInProgress
+      *> Json.write "readsInProgress" s.readsInProgress
+      *> Json.write "partitionsCached" s.partitionsCached
+      *> Json.write "status" s.status
+      *> Json.write "stateReason" s.stateReason
+      *> Json.write "name" s.name
+      *> Json.write "mode" s.mode
+      *> Json.write "position" s.position
+      *> Json.write "progress" s.progress
+      *> Json.write "lastCheckpoint" s.lastCheckpoint
+      *> Json.write "eventsProcessedAfterRestart" s.eventsProcessedAfterRestart
+      *> Json.write "statusUrl" (s.statusUrl.ToString())
+      *> Json.write "stateUrl" (s.stateUrl.ToString())
+      *> Json.write "resultUrl" (s.resultUrl.ToString())
+      *> Json.write "queryUrl" (s.queryUrl.ToString())
+      *> Json.write "enableCommandUrl" (s.enableCommandUrl.ToString())
+      *> Json.write "disableCommandUrl" (s.disableCommandUrl.ToString())
+      *> Json.write "checkpointStatus" s.checkpointStatus
+      *> Json.write "bufferedEvents" s.bufferedEvents
+      *> Json.write "writePendingEventsBeforeCheckpoint" s.writePendingEventsBeforeCheckpoint
+      *> Json.write "writePendingEventsAfterCheckpoint" s.writePendingEventsAfterCheckpoint
 
   let getStatus ctx name =
     let pm = mkManager ctx
@@ -1216,7 +1322,8 @@ module Projections =
         pm.GetStatusAsync(name, ctx.creds)
         |> Async.AwaitTask
         |> handleHttpCodes ctx.logger
-      return res |> Option.map Status.Parse
+      return res |> Option.map (Json.parse 
+        >> (Json.deserialize : _ -> Status))
     }
 
   let listAll ctx =
@@ -1243,7 +1350,7 @@ module Projections =
         match status with
         | None ->
           do! stream |> enable ctx
-        | Some status when status.Status <> "Running" ->
+        | Some status when status.status <> "Running" ->
           ctx.logger.Debug (sprintf "projection '%s' in status '%A', enabling now"  stream status)
           do! stream |> enable ctx
         | _ -> return ()
@@ -1280,7 +1387,7 @@ module Projections =
       | None -> 
         ctx.logger.Debug "calling create_continuous from 404 case"
         do! create_continuous ctx name query
-      | Some status when status.Status <> "Running" ->
+      | Some status when status.status <> "Running" ->
         ctx.logger.Debug "calling create_continuous from not Running case"
         do! create_continuous ctx name query
       | other ->

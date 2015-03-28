@@ -1,5 +1,3 @@
-EventStore.Client
 FSharp.Core
-FSharpx.Core
-Newtonsoft.Json
-FSharp.Data
+Chiron
+EventStore.Client.PreRelease

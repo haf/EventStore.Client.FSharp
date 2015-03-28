@@ -995,6 +995,11 @@ module ConnectionSettings =
   let configureStart () =
     ConnectionSettings.Create()
 
+  let configureEndEp (connectionUri : Uri) (settingBuilder : ConnectionSettingsBuilder) =
+    let settings = ConnectionSettingsBuilder.op_Implicit(settingBuilder)
+    let conn = EventStoreConnection.Create(settings, connectionUri)
+    conn.ApiWrap()
+
   /// End configuring the connection settings and return
   /// a new connection with those settings (not connected).
   let configureEnd (endpoint : IPEndPoint) (settingBuilder : ConnectionSettingsBuilder) = //, clusterBuilder : ClusterSettingsBuilder) =

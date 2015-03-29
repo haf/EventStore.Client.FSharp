@@ -159,13 +159,15 @@ module internal Helpers =
 
   // currently unused, because I can't get the types to match properly
   module Async =
+    let map fMap value =
+      async { let! v = value
+              return fMap v }
+
     //   : (('a -> 'b) -> ('c -> Async<'a>) -> 'c -> Async<'b>)
-    let MapCompose fMap fOrig c =
+    let mapCompose fMap fOrig c =
       async {
         let! res = fOrig c
         return fMap res }
-
-    let (<<!) = MapCompose
 
 // https://github.com/eulerfx/DDDInventoryItemFSharp/blob/master/DDDInventoryItemFSharp/EventStore.fs
 // https://github.com/EventStore/getting-started-with-event-store/blob/master/src/GetEventStoreRepository/GetEventStoreRepository.cs
@@ -180,19 +182,35 @@ type Offset =
     | Specific of uint32
     | LastInStream
 type StreamId = string
+type GroupName = string
 type TransactionId = int64
+
+type ConnectionDisconnected = delegate of obj * ClientConnectionEventArgs -> unit
+and ConnectionReconnecting = delegate of obj * ClientReconnectingEventArgs -> unit
+and ConnectionClosed = delegate of obj * ClientClosedEventArgs -> unit
+and ConnectionError = delegate of obj * ClientErrorEventArgs -> unit
+and ConnectionAuthenticationFailed = delegate of obj * ClientAuthenticationFailedEventArgs -> unit
+and ConnectionConnected = delegate of obj * ClientConnectionEventArgs -> unit
 
 /// Wrapper interface for <see cref="EventStore.ClientAPI.IEventStoreConnection" />
 /// that has all the important operations.
 /// Consumable from C# in order to allow easy mocking and stubbing.
 /// See the 'Conn' module for documentation of each method.
-type Connection =
+and Connection =
   inherit IDisposable
 
+  // events
+  //abstract Diconnected                   : IEvent<ConnectionDisconnected, ClientConnectionEventArgs>
+  //abstract Reconnecting                  : IEvent<ConnectionReconnecting, ClientReconnectingEventArgs>
+  //abstract Closed                        : IEvent<ConnectionClosed, ClientClosedEventArgs>
+  //abstract ErrorOccurred                 : IEvent<ConnectionError, ClientErrorEventArgs>
+  //abstract AuthenticationFailed          : IEvent<ConnectionAuthenticationFailed, ClientAuthenticationFailedEventArgs>
+  //abstract Connected                     : IEvent<ConnectionConnected, ClientConnectionEventArgs>
+
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L181
-  abstract AppendToStreamAsync           : StreamId
+  abstract AppendToStream                : StreamId
                                             * ExpectedVersionUnion
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                             * EventData seq
                                             -> WriteResult Task
 
@@ -200,83 +218,140 @@ type Connection =
   abstract Close                         : unit -> unit
 
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L64
-  abstract ConnectAsync                  : unit -> Task
+  abstract Connect                       : unit -> Task
 
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L53
-  abstract ConnectionName                : unit -> string with get
+  abstract ConnectionName                : string
+
+  abstract ConnectPersistentSubscription : StreamId
+                                            * GroupName
+                                            * Action<EventStorePersistentSubscription, ResolvedEvent>
+                                            // subscriptionDropped:
+                                            * Action<EventStorePersistentSubscription, SubscriptionDropReason, exn> option
+                                            * SystemData.UserCredentials
+                                            * Count
+                                            * bool
+                                            -> EventStorePersistentSubscription
 
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L242
   abstract ContinueTransaction           : TransactionId
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                             -> EventStoreTransaction
 
+  abstract CreatePersistentSubscription  : StreamId
+                                            * GroupName
+                                            * PersistentSubscriptionSettings
+                                            * SystemData.UserCredentials
+                                            -> Task
+
+  abstract DeletePersistentSubscription  : StreamId
+                                            * GroupName
+                                            * SystemData.UserCredentials
+                                            -> Task
+
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L86
-  abstract DeleteStreamAsync             : StreamId
+  abstract DeleteStream                  : StreamId
                                             * ExpectedVersionUnion
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                             -> DeleteResult Task
+
+  abstract GetStreamMetadata             : StreamId
+                                            * SystemData.UserCredentials
+                                            -> StreamMetadataResult Task
+
+  abstract GetStreamMetadataBytes        : StreamId
+                                            * SystemData.UserCredentials
+                                            -> RawStreamMetadataResult Task
 
   // all read
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L346
-  abstract ReadAllEventsBackwardAsync    : Position * Count * ResolveLinksStrategy
-                                            * SystemData.UserCredentials option
+  abstract ReadAllEventsBackward         : Position * Count * ResolveLinksStrategy
+                                            * SystemData.UserCredentials
                                             -> AllEventsSlice Task
 
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L326
-  abstract ReadAllEventsForwardAsync     : Position * Count * ResolveLinksStrategy
-                                            * SystemData.UserCredentials option
+  abstract ReadAllEventsForward          : Position * Count * ResolveLinksStrategy
+                                            * SystemData.UserCredentials
                                             -> AllEventsSlice Task
 
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L262
-  abstract ReadEventAsync                : StreamId
+  abstract ReadEvent                     : StreamId
                                             * EventVersion
                                             * ResolveLinksStrategy
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                             -> EventReadResult Task
 
   // stream read
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L306
-  abstract ReadStreamEventsBackwardAsync : StreamId * Offset * Count
+  abstract ReadStreamEventsBackward      : StreamId * Offset * Count
                                             * ResolveLinksStrategy
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                             -> StreamEventsSlice Task
 
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L284
-  abstract ReadStreamEventsForwardAsync  : StreamId * Offset * Count
+  abstract ReadStreamEventsForward       : StreamId * Offset * Count
                                             * ResolveLinksStrategy
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                             -> StreamEventsSlice Task
 
   // metadata, skipping 'raw' methods so far
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L393
-  abstract SetStreamMetadataAsync        : StreamId
+  abstract SetStreamMetadata             : StreamId
                                             * ExpectedVersionUnion
                                             * StreamMetadata
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                             -> WriteResult Task
 
-  /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L401
-  abstract GetStreamMetadataAsync        : StreamId
-                                            * SystemData.UserCredentials option
-                                            -> StreamMetadataResult Task
+  abstract SetStreamMetadataBytes        : StreamId
+                                            * ExpectedVersionUnion
+                                            * byte []
+                                            * SystemData.UserCredentials
+                                            -> WriteResult Task
+
+  abstract SetSystemSettings             : SystemSettings
+                                            * SystemData.UserCredentials
+                                            -> Task
 
   // tx
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L229
-  abstract StartTransactionAsync         : StreamId
+  abstract StartTransaction              : StreamId
                                             * ExpectedVersionUnion
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                            -> EventStoreTransaction Task
 
   // subscribe API
+
+  /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L377
+  abstract SubscribeToAll                : ResolveLinksStrategy
+                                            // eventAppeared:
+                                            * Action<EventStoreSubscription, ResolvedEvent>
+                                            // subscriptionDropped:
+                                            * Action<EventStoreSubscription, SubscriptionDropReason, exn> option
+                                            * SystemData.UserCredentials
+                                            -> EventStoreSubscription Task
+
+  /// Subscribe from, position exclusive
+  /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L383
+  abstract SubscribeToAllFrom            : Position option
+                                            * ResolveLinksStrategy
+                                            // eventAppeared:
+                                            * Action<EventStoreCatchUpSubscription, ResolvedEvent>
+                                            // liveProcessingStarted:
+                                            * Action<EventStoreCatchUpSubscription> option
+                                            // subscriptionDropped:
+                                            * Action<EventStoreCatchUpSubscription, SubscriptionDropReason, exn> option
+                                            * SystemData.UserCredentials
+                                            -> EventStoreAllCatchUpSubscription
+
   /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L355
-  abstract SubscribeToStreamAsync        : StreamId
+  abstract SubscribeToStream             : StreamId
                                             // resolveLinks:
                                             * ResolveLinksStrategy
                                             // eventAppeared:
                                             * Action<EventStoreSubscription, ResolvedEvent>
                                             // subscriptionDropped:
                                             * Action<EventStoreSubscription, SubscriptionDropReason, exn> option
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                             -> EventStoreSubscription Task
 
   /// Subscribe from, offset exclusive
@@ -291,30 +366,14 @@ type Connection =
                                             * Action<EventStoreCatchUpSubscription> option
                                             // subscriptionDropped:
                                             * Action<EventStoreCatchUpSubscription, SubscriptionDropReason, exn> option
-                                            * SystemData.UserCredentials option
+                                            * SystemData.UserCredentials
                                             -> EventStoreStreamCatchUpSubscription
 
-  /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L377
-  abstract SubscribeToAllAsync           : ResolveLinksStrategy
-                                            // eventAppeared:
-                                            * Action<EventStoreSubscription, ResolvedEvent>
-                                            // subscriptionDropped:
-                                            * Action<EventStoreSubscription, SubscriptionDropReason, exn> option
-                                            * SystemData.UserCredentials option
-                                            -> Task<EventStoreSubscription>
-
-  /// Subscribe from, position exclusive
-  /// https://github.com/EventStore/EventStore/blob/ES-NET-v2.0.1/src/EventStore/EventStore.ClientAPI/IEventStoreConnection.cs#L383
-  abstract SubscribeToAllFrom            : Position option
-                                            * ResolveLinksStrategy
-                                            // eventAppeared:
-                                            * Action<EventStoreCatchUpSubscription, ResolvedEvent>
-                                            // liveProcessingStarted:
-                                            * Action<EventStoreCatchUpSubscription> option
-                                            // subscriptionDropped:
-                                            * Action<EventStoreCatchUpSubscription, SubscriptionDropReason, exn> option
-                                            * SystemData.UserCredentials option
-                                            -> EventStoreAllCatchUpSubscription
+  abstract UpdatePersistentSubscription  : StreamId
+                                            * GroupName
+                                            * PersistentSubscriptionSettings
+                                            * SystemData.UserCredentials
+                                            -> Task
 
 /// Type extensions that allow the programmer to easily cast the 
 /// <see cref="EventStore.ClientAPI.EventStoreConnection" /> to
@@ -330,54 +389,74 @@ module TypeExtensions =
     /// to allow easy stubbing and mocking).
     member y.ApiWrap() : Connection =
       { new Connection with
-          member x.AppendToStreamAsync(streamId, expectedVersion, userCredentials, events) =
+
+          //member Diconnected = y.Disconnected
+          //member Reconnecting = y.Reconnecting
+          //member Closed = y.Closed
+          //member ErrorOccurred = y.ErrorOccurred
+          //member AuthenticationFailed = y.AuthenticationFailed
+          //member Connected = y.Connected
+
+          member x.AppendToStream(streamId, expectedVersion, userCredentials, events) =
             match expectedVersion with
             | ExpectedVersion expectedVersion ->
-              y.AppendToStreamAsync(streamId, expectedVersion, events, Option.noneIsNull userCredentials)
+              y.AppendToStreamAsync(streamId, expectedVersion, events, userCredentials)
 
           member x.ConnectionName =
             y.ConnectionName
 
-          member x.ConnectAsync () =
-            y.ConnectAsync ()
-
           member x.Close () =
             y.Close()
 
-          member x.DeleteStreamAsync (streamId, expectedVersion, userCredentials) =
+          member x.Connect () =
+            y.ConnectAsync ()
+
+          member x.ConnectPersistentSubscription (streamId, groupName, eventAppeared, subscriptionDropped, userCredentials, bufferSize, autoAck) =
+            let bufferSize = validUint bufferSize
+            y.ConnectToPersistentSubscription(streamId, groupName, eventAppeared,
+                                              Option.noneIsNull subscriptionDropped, userCredentials,
+                                              bufferSize, autoAck)
+
+          member x.ContinueTransaction(txId, userCredentials) =
+            y.ContinueTransaction(txId, userCredentials)
+
+          member x.CreatePersistentSubscription(streamId, groupName, settings, userCredentials) =
+            y.CreatePersistentSubscriptionAsync(streamId, groupName, settings, userCredentials)
+
+          member x.DeletePersistentSubscription(streamId, groupName, userCredentials) =
+            y.DeletePersistentSubscriptionAsync(streamId, groupName, userCredentials)
+
+          member x.DeleteStream (streamId, expectedVersion, userCredentials) =
             match expectedVersion with
             | ExpectedVersion expectedVersion ->
-              y.DeleteStreamAsync(streamId, expectedVersion, Option.noneIsNull userCredentials)
+              y.DeleteStreamAsync(streamId, expectedVersion, userCredentials)
 
-          member x.ReadAllEventsForwardAsync (position, maxCount, resolveLinks, userCredentials) =
-            let maxCount = validUint maxCount
-            y.ReadAllEventsForwardAsync(position, maxCount, 
-                                        (match resolveLinks with ResolveLinks r -> r),
-                                        Option.noneIsNull userCredentials)
-          member x.ReadAllEventsBackwardAsync (position, maxCount, resolveLinks, userCredentials) =
+          member x.GetStreamMetadata (streamId, userCredentials) =
+            y.GetStreamMetadataAsync(streamId, userCredentials)
+
+          member x.GetStreamMetadataBytes(streamId, userCredentials) =
+            y.GetStreamMetadataAsRawBytesAsync(streamId, userCredentials)
+
+          member x.ReadAllEventsBackward (position, maxCount, resolveLinks, userCredentials) =
             let maxCount = validUint maxCount
             y.ReadAllEventsBackwardAsync(position, maxCount,
                                          (match resolveLinks with ResolveLinks r -> r),
-                                         Option.noneIsNull userCredentials)
+                                         userCredentials)
 
-          member x.ReadEventAsync(stream, eventVersion, resolveLinks, userCredentials) =
+          member x.ReadAllEventsForward (position, maxCount, resolveLinks, userCredentials) =
+            let maxCount = validUint maxCount
+            y.ReadAllEventsForwardAsync(position, maxCount,
+                                        (match resolveLinks with ResolveLinks r -> r),
+                                        userCredentials)
+
+          member x.ReadEvent(stream, eventVersion, resolveLinks, userCredentials) =
             match eventVersion with
             | EventVersion eventVersion ->
               y.ReadEventAsync(stream, eventVersion,
                                (match resolveLinks with ResolveLinks r -> r),
-                               Option.noneIsNull userCredentials)
+                               userCredentials)
 
-          member x.ReadStreamEventsBackwardAsync (streamId, start, count, resolveLinks, userCredentials) =
-            let count = validUint count
-            let startEvent =
-                match start with
-                | Specific i -> validUint i
-                | LastInStream -> -1
-            y.ReadStreamEventsBackwardAsync(streamId, startEvent, count,
-                                            (match resolveLinks with ResolveLinks r -> r),
-                                            Option.noneIsNull userCredentials)
-
-          member x.ReadStreamEventsForwardAsync (streamId, start, count, resolveLinks, userCredentials) =
+          member x.ReadStreamEventsForward (streamId, start, count, resolveLinks, userCredentials) =
             let count = validUint count
             let startEvent =
                 match start with
@@ -385,29 +464,57 @@ module TypeExtensions =
                 | LastInStream -> -1
             y.ReadStreamEventsForwardAsync(streamId, startEvent, count,
                                            (match resolveLinks with ResolveLinks r -> r),
-                                           Option.noneIsNull userCredentials)
+                                           userCredentials)
 
-          member x.SetStreamMetadataAsync (streamId, expectedVersion, metadata, userCredentials) =
+          member x.ReadStreamEventsBackward (streamId, start, count, resolveLinks, userCredentials) =
+            let count = validUint count
+            let startEvent =
+                match start with
+                | Specific i -> validUint i
+                | LastInStream -> -1
+            y.ReadStreamEventsBackwardAsync(streamId, startEvent, count,
+                                            (match resolveLinks with ResolveLinks r -> r),
+                                            userCredentials)
+
+          member x.SetStreamMetadata (streamId, expectedVersion, metadata, userCredentials) =
             match expectedVersion with
             | ExpectedVersion expectedVersion ->
-              y.SetStreamMetadataAsync(streamId, expectedVersion, metadata, Option.noneIsNull userCredentials)
+              y.SetStreamMetadataAsync(streamId, expectedVersion, metadata, userCredentials)
 
-          member x.GetStreamMetadataAsync (streamId, userCredentials) =
-            y.GetStreamMetadataAsync(streamId, Option.noneIsNull userCredentials)
-
-          member x.StartTransactionAsync (streamId, expectedVersion, userCredentials) =
+          member x.SetStreamMetadataBytes(streamId, expectedVersion, metadata, userCredentials) =
             match expectedVersion with
             | ExpectedVersion expectedVersion ->
-              y.StartTransactionAsync(streamId, expectedVersion, Option.noneIsNull userCredentials)
-              
-          member x.ContinueTransaction(txId, userCredentials) =
-            y.ContinueTransaction(txId, Option.noneIsNull userCredentials)
+              y.SetStreamMetadataAsync(streamId, expectedVersion, metadata, userCredentials)
 
-          member x.SubscribeToStreamAsync (streamId, resolveLinks, eventAppeared, subscriptionDropped, userCredentials) =
+          member x.SetSystemSettings(systemSettings, userCredentials) =
+            y.SetSystemSettingsAsync(systemSettings, userCredentials)
+
+          member x.StartTransaction (streamId, expectedVersion, userCredentials) =
+            match expectedVersion with
+            | ExpectedVersion expectedVersion ->
+              y.StartTransactionAsync(streamId, expectedVersion, userCredentials)
+            
+          member x.SubscribeToAll (resolveLinks, eventAppeared, subscriptionDropped,
+                                        userCredentials) =
+            let resolveLinks = match resolveLinks with ResolveLinks r -> r
+            y.SubscribeToAllAsync(resolveLinks, eventAppeared,
+                                  Option.noneIsNull subscriptionDropped,
+                                  userCredentials)
+
+          member x.SubscribeToAllFrom (fromPos, resolveLinks, eventAppeared,
+                                       liveProcessingStarted, subscriptionDropped, userCredentials) =
+            let resolveLinks = match resolveLinks with ResolveLinks r -> r
+            y.SubscribeToAllFrom(Option.toNullable fromPos,
+                                 resolveLinks, eventAppeared,
+                                 Option.noneIsNull liveProcessingStarted,
+                                 Option.noneIsNull subscriptionDropped,
+                                 userCredentials)
+
+          member x.SubscribeToStream (streamId, resolveLinks, eventAppeared, subscriptionDropped, userCredentials) =
             let resolveLinks = match resolveLinks with ResolveLinks r -> r
             y.SubscribeToStreamAsync(streamId, resolveLinks, eventAppeared,
                                      Option.noneIsNull subscriptionDropped,
-                                     Option.noneIsNull userCredentials)
+                                     userCredentials)
 
           member x.SubscribeToStreamFrom (streamId, lastCheckpoint, resolveLinks,
                                           eventAppeared, liveProcessingStarted,
@@ -422,22 +529,11 @@ module TypeExtensions =
                                     resolveLinks, eventAppeared,
                                     Option.noneIsNull liveProcessingStarted,
                                     Option.noneIsNull subscriptionDropped,
-                                    Option.noneIsNull userCredentials)
+                                    userCredentials)
 
-          member x.SubscribeToAllAsync (resolveLinks, eventAppeared, subscriptionDropped,
-                                        userCredentials) =
-            let resolveLinks = match resolveLinks with ResolveLinks r -> r
-            y.SubscribeToAllAsync(resolveLinks, eventAppeared,
-                                  Option.noneIsNull subscriptionDropped,
-                                  Option.noneIsNull userCredentials)
-          member x.SubscribeToAllFrom (fromPos, resolveLinks, eventAppeared,
-                                       liveProcessingStarted, subscriptionDropped, userCredentials) = 
-            let resolveLinks = match resolveLinks with ResolveLinks r -> r
-            y.SubscribeToAllFrom(Option.toNullable fromPos,
-                                 resolveLinks, eventAppeared,
-                                 Option.noneIsNull liveProcessingStarted,
-                                 Option.noneIsNull subscriptionDropped,
-                                 Option.noneIsNull userCredentials)
+          member x.UpdatePersistentSubscription(streamId, groupName, subscriptionSettings, userCredentials) =
+            y.UpdatePersistentSubscriptionAsync(streamId, groupName, subscriptionSettings, userCredentials)
+
           member x.Dispose() =
             y.Dispose()
           }
@@ -756,7 +852,8 @@ module Types =
   let private newAES (readDirection : EventStore.ClientAPI.ReadDirection)
     (fromPosition : Position)
     (nextPosition : Position)
-    (events : EventStore.ClientAPI.ResolvedEvent array) =
+    (events : EventStore.ClientAPI.ResolvedEvent array)
+    (isEndOfStream : bool) =
     ctorAES ()
     |> setterAES "ReadDirection" readDirection
     |> setterAES "FromPosition" fromPosition
@@ -777,22 +874,29 @@ module Types =
     { Events        : ResolvedEvent list
       FromPosition  : Position
       NextPosition  : Position
-      ReadDirection : ReadDirection }
+      ReadDirection : ReadDirection
+      IsEndOfStream : bool }
 
   type AllEventsSlice with
-    static member Empty = { Events = []; FromPosition = Position(); NextPosition = Position(); ReadDirection = Forward }
+    static member Empty =
+      { Events        = []
+        FromPosition  = Position()
+        NextPosition  = Position()
+        ReadDirection = Forward
+        IsEndOfStream = true }
 
   let unwrapAllEventsSlice (e : AllEventsSlice) =
     newAES (unwrapReadDirection e.ReadDirection)
-      e.FromPosition
-      e.NextPosition
-      (e.Events |> List.map unwrapResolvedEvent |> List.toArray)
+           e.FromPosition
+           e.NextPosition
+           (e.Events |> List.map unwrapResolvedEvent |> List.toArray)
 
   let wrapAllEventsSlice (e : EventStore.ClientAPI.AllEventsSlice) =
     { Events        = e.Events |> List.ofArray |> List.map wrapResolvedEvent
       FromPosition  = e.FromPosition
       NextPosition  = e.FromPosition
-      ReadDirection = e.ReadDirection |> wrapReadDirection }
+      ReadDirection = e.ReadDirection |> wrapReadDirection
+      IsEndOfStream = e.IsEndOfStream }
 
 /// Thin F# wrapper on top of EventStore.Client's API. Doesn't
 /// translate any structures, but enables currying and F# calling conventions.
@@ -805,10 +909,15 @@ module Conn =
 
   // CONNECTION API
 
+  let name (c : Connection) = c.ConnectionName
+
   /// AppendToStreamAsync:
   /// see docs for append.
-  let internal appendRaw (c : Connection) streamId expectedVersion credentials (eventData : EventStore.ClientAPI.EventData list) =
-    c.AppendToStreamAsync(streamId, expectedVersion, credentials, eventData)
+  let internal appendRaw (c : Connection)
+                         streamId
+                         expectedVersion credentials
+                         (eventData : EventStore.ClientAPI.EventData list) =
+    c.AppendToStream(streamId, expectedVersion, credentials, eventData)
     |> awaitTask
     |> canThrowWrongExpectedVersion
 
@@ -843,102 +952,36 @@ module Conn =
   /// If expectedVersion > currentVersion - a WrongExpectedVersionException will be returned in Choice2Of2.
   /// If None of the events were previously committed - a WrongExpectedVersionException will be returned in Choice2Of2.
   /// </exception>
-  let append (c : Connection) credentials streamId expectedVersion (eventData : EventData list) =
-    async { return! appendRaw c streamId expectedVersion credentials (eventData |> List.map unwrapEventData) }
+  let append (c : Connection) credentials streamId expectedVersion
+             (eventData : EventData list) =
+    appendRaw c streamId expectedVersion credentials (eventData |> List.map unwrapEventData)
 
-  /// Close
-  let close (c : Connection) =
-    c.Close()
-
-  /// ConnectAsync
-  let connect (c : Connection) =
-    if obj.ReferenceEquals(null, c) then invalidArg "c" "c is null"
-    c.ConnectAsync() |> awaitTask
-
-  let name (c : Connection) = c.ConnectionName
-
-  /// ContinueTransaction
-  let continueTransaction (c : Connection) txId =
-    c.ContinueTransaction txId
-
-  /// DeleteStreamAsync
-  let delete (c : Connection) expectedVersion streamId userCredentials =
-    c.DeleteStreamAsync(streamId, expectedVersion, userCredentials)
-    |> awaitTask
-    |> canThrowWrongExpectedVersion
-
-  // TODO: Types.AllEventSlice
-  /// ReadAllEventsBackwardAsync
-  let readAllBack position maxCount resolveLinks userCredentials (c : Connection) =
-    c.ReadAllEventsBackwardAsync(position, maxCount, resolveLinks, userCredentials)
-    |> Async.AwaitTask
-
-  // TODO: Types.AllEventSlice
-  /// ReadAllEventsForwardAsync
-  let readAll position maxCount resolveLinks userCredentials (c : Connection) =
-    c.ReadAllEventsForwardAsync(position, maxCount, resolveLinks, userCredentials)
-    |> Async.AwaitTask
-
-  /// ReadEventAsync
-  let internal readEventRaw stream expectedVersion resolveLinks userCredentials (c : Connection) =
-    c.ReadEventAsync(stream, expectedVersion, resolveLinks, userCredentials)
-    |> Async.AwaitTask
-
-  /// ReadEventAsync
-  let readEvent stream expectedVersion resolveLinks userCredentials (c : Connection) =
-    async { let! res = c |> readEventRaw stream expectedVersion resolveLinks userCredentials
-            return res |> wrapEventReadResult }
-
-  /// ReadStreamEventsBackwardAsync
-  let internal readBackRaw streamId start count resolveLinks userCredentials (c : Connection) =
-    c.ReadStreamEventsBackwardAsync(streamId, start, count, resolveLinks, userCredentials)
-    |> Async.AwaitTask
-
-  /// ReadStreamEventsBackwardAsync
-  let readBack streamId start count resolveLinks userCredentials (c : Connection) =
-    async { let! res = c |> readBackRaw streamId start count resolveLinks userCredentials
-            return res |> wrapStreamEventsSlice }
-
-  /// ReadStreamEventsForwardAsync
-  /// <param name="start">Where to start reading, inclusive</param>
-  let internal readRaw streamId start count resolveLinkTos userCredentials (c : Connection) =
-    c.ReadStreamEventsForwardAsync(streamId, start, count, resolveLinkTos, userCredentials)
-    |> Async.AwaitTask
-
-  /// ReadStreamEventsForwardAsync
-  /// <param name="start">Where to start reading, inclusive</param>
-  let read streamId start count resolveLinkTos userCredentials (c : Connection) =
-    async { let! res = c |> readRaw streamId start count resolveLinkTos userCredentials
-            return res |> wrapStreamEventsSlice }
-
-  /// SetStreamMetadataAsync
-  let setMetadata streamId expectedVersion metadata userCredentials (c : Connection) =
-    c.SetStreamMetadataAsync(streamId, expectedVersion, metadata, userCredentials)
-    |> awaitTask
-
-  /// GetStreamMetadataAsync
-  let getMetadata streamId userCredentials (c : Connection) =
-    c.GetStreamMetadataAsync(streamId, userCredentials)
-    |> Async.AwaitTask
-
-  /// StartTransactionAsync
-  let startTx streamId expectedVersion userCredentials (c : Connection) =
-    c.StartTransactionAsync(streamId, expectedVersion, userCredentials) 
-    |> Async.AwaitTask
-    |> canThrowWrongExpectedVersion
-
+  /// <summary>
   /// SubscribeToStream
-  let subscribe (c : Connection)
-                streamId
-                resolveLinks
-                eventAppeared
-                subscriptionDropped
-                userCredentials =
-    c.SubscribeToStreamAsync(streamId, resolveLinks,
+  /// Asynchronously subscribes to a single event stream. New events
+  /// written to the stream while the subscription is active will be
+  /// pushed to the client.
+  /// </summary>
+  /// <param name="stream">The stream to subscribe to</param>
+  /// <param name="resolveLinkTos">Whether to resolve Link events automatically</param>
+  /// <param name="eventAppeared">An action invoked when a new event is received over the subscription</param>
+  /// <param name="subscriptionDropped">An action invoked if the subscription is dropped</param>
+  /// <param name="userCredentials">User credentials to use for the operation</param>
+  /// <returns>An <see cref="EventStoreSubscription"/> representing the subscription</returns>
+  let catchUp (c : Connection)
+              streamId
+              resolveLinks
+              eventAppeared
+              subscriptionDropped
+              userCredentials =
+    c.SubscribeToStream(streamId, resolveLinks,
                              eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                              subscriptionDropped |> Option.map action3,
                              userCredentials)
     |> Async.AwaitTask
+
+  [<Obsolete "use catchUp">]
+  let subscribe = catchUp
 
   /// SubscribeToStreamFrom
   ///
@@ -952,40 +995,194 @@ module Conn =
   /// - `subscriptionDropped` - for handling the drop of a subscription
   /// - `userCredentials` - user credentials to use for connecting to ES
   ///
-  let subscribeFrom (c : Connection)
-                    streamId
-                    streamCheckpoint
-                    resolveLinks
-                    eventAppeared
-                    liveProcessingStarted // EventStoreCatchUpSubscription -> unit
-                    subscriptionDropped
-                    userCredentials =
+  let catchUpFrom (c : Connection)
+                  streamId
+                  streamCheckpoint
+                  resolveLinks
+                  eventAppeared
+                  liveProcessingStarted // EventStoreCatchUpSubscription -> unit
+                  subscriptionDropped
+                  userCredentials =
     c.SubscribeToStreamFrom(streamId, streamCheckpoint, resolveLinks,
                             eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                             liveProcessingStarted |> Option.map action,
                             subscriptionDropped |> Option.map action3,
                             userCredentials)
 
+  [<Obsolete "use catchUpFrom">]
+  let subscribeFrom = catchUpFrom
+
   /// SubscribeToAll
-  let subscribeAll (c : Connection)
-                   resolveLinks
-                   eventAppeared
-                   subscriptionDropped
-                   userCredentials =
-    c.SubscribeToAllAsync(resolveLinks,
-                          eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
-                          subscriptionDropped |> Option.map action3,
-                          userCredentials)
+  let catchUpAll (c : Connection)
+                 resolveLinks
+                 eventAppeared
+                 subscriptionDropped
+                 userCredentials =
+    c.SubscribeToAll(resolveLinks,
+                     eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
+                     subscriptionDropped |> Option.map action3,
+                     userCredentials)
     |> Async.AwaitTask
 
+  [<Obsolete "use catchUpAll">]
+  let subscribeAll = catchUpAll
+
   /// SubscribeToAllFrom
-  let subscribeAllFrom (c : Connection) fromPos resolveLinks eventAppeared 
+  let catchUpAllFrom (c : Connection) fromPos resolveLinks eventAppeared
     liveProcessingStarted subscriptionDropped userCredentials =
     c.SubscribeToAllFrom(fromPos, resolveLinks,
                          eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
                          liveProcessingStarted |> Option.map action,
                          subscriptionDropped |> Option.map action3,
                          userCredentials)
+
+  [<Obsolete "use catchUpAllFrom">]
+  let subscribeAllFrom = catchUpAllFrom
+
+  /// Closes the EventStore connection
+  let close (c : Connection) =
+    c.Close()
+
+  /// Connects the connection to the given connection string/uri.
+  let connect (c : Connection) =
+    if obj.ReferenceEquals(null, c) then invalidArg "c" "c is null"
+    c.Connect() |> awaitTask
+
+  /// <summary>
+  /// Subscribes a persistent subscription (competing consumer) to the event store
+  /// </summary>
+  /// <param name="groupName">The subscription group to connect to</param>
+  /// <param name="stream">The stream to subscribe to</param>
+  /// <param name="eventAppeared">An action invoked when an event appears</param>
+  /// <param name="subscriptionDropped">An action invoked if the subscription is dropped</param>
+  /// <param name="userCredentials">User credentials to use for the operation</param>
+  /// <param name="bufferSize">The buffer size to use for the persistent subscription</param>
+  /// <param name="autoAck">Whether the subscription should automatically acknowledge messages processed.
+  /// If not set the receiver is required to explicitly acknowledge messages through the subscription.</param>
+  /// <remarks>This will connect you to a persistent subscription group for a stream. The subscription group
+  /// must first be created with Conn.createPersistent many connections
+  /// can connect to the same group and they will be treated as competing consumers within the group.
+  /// If one connection dies work will be balanced across the rest of the consumers in the group. If
+  /// you attempt to connect to a group that does not exist you will be given an exception.
+  /// </remarks>
+  /// <returns>An <see cref="EventStoreSubscription"/> representing the subscription</returns>
+  let connectPersistent (c : Connection) streamId groupName eventAppeared
+                        subscriptionDropped userCredentials bufferSize autoAck =
+    c.ConnectPersistentSubscription(streamId, groupName,
+                                    eventAppeared |> functor2 Types.wrapResolvedEvent |> action2,
+                                    subscriptionDropped |> Option.map action3,
+                                    userCredentials, bufferSize, autoAck)
+
+  /// <summary>
+  /// ContinueTransaction
+  /// Continues transaction by provided transaction ID.
+  /// </summary>
+  /// <remarks>
+  /// A <see cref="EventStoreTransaction"/> allows the calling of multiple writes with multiple
+  /// round trips over long periods of time between the caller and the event store. This method
+  /// is only available through the TCP interface and no equivalent exists for the RESTful interface.
+  /// </remarks>
+  /// <param name="transactionId">The transaction ID that needs to be continued.</param>
+  /// <param name="userCredentials">The optional user credentials to perform operation with.</param>
+  /// <returns><see cref="EventStoreTransaction"/> object.</returns>
+  let continueTransaction (c : Connection) txId =
+    c.ContinueTransaction txId
+
+  /// <summary>
+  /// Asynchronously create a persistent subscription group on a stream
+  /// </summary>
+  /// <param name="stream">The name of the stream to create the persistent subscription on</param>
+  /// <param name="groupName">The name of the group to create</param>
+  /// <param name="settings">The <see cref="PersistentSubscriptionSettings"></see> for the subscription</param>
+  /// <param name="credentials">The credentials to be used for this operation.</param>
+  /// <returns>A <see cref="PersistentSubscriptionCreateResult"/>.</returns>
+  let createPersistent (c : Connection) streamId groupName settings userCredentials =
+    c.CreatePersistentSubscription(streamId, groupName, settings, userCredentials)
+    |> awaitTask
+
+  /// DeleteStreamAsync
+  let delete (c : Connection) expectedVersion streamId userCredentials =
+    c.DeleteStream(streamId, expectedVersion, userCredentials)
+    |> awaitTask
+    |> canThrowWrongExpectedVersion
+
+  /// DeletePersistentSubscription
+  let deletePersistent (c : Connection) streamId groupName userCredentials =
+    c.DeletePersistentSubscription(streamId, groupName, userCredentials)
+    |> awaitTask
+
+  /// GetStreamMetadata
+  let getMetadata (c : Connection) streamId userCredentials =
+    c.GetStreamMetadata(streamId, userCredentials)
+    |> Async.AwaitTask
+
+  /// GetStreamMetadataBytes
+  let getMetadataBytes (c : Connection) streamId userCredentials =
+    c.GetStreamMetadataBytes(streamId, userCredentials)
+    |> Async.AwaitTask
+
+  /// ReadAllEventsBackwardAsync
+  let readAllBack (c : Connection) position maxCount resolveLinks userCredentials =
+    c.ReadAllEventsBackward(position, maxCount, resolveLinks, userCredentials)
+    |> Async.AwaitTask
+    |> Async.map wrapAllEventsSlice
+
+  /// ReadAllEventsForwardAsync
+  let readAll (c : Connection) position maxCount resolveLinks userCredentials =
+    c.ReadAllEventsForward(position, maxCount, resolveLinks, userCredentials)
+    |> Async.AwaitTask
+    |> Async.map wrapAllEventsSlice
+
+  /// ReadEventAsync
+  let internal readEventRaw (c : Connection) stream expectedVersion resolveLinks userCredentials =
+    c.ReadEvent(stream, expectedVersion, resolveLinks, userCredentials)
+    |> Async.AwaitTask
+
+  /// ReadEventAsync
+  let readEvent (c : Connection) stream expectedVersion resolveLinks userCredentials =
+    readEventRaw c stream expectedVersion resolveLinks userCredentials
+    |> Async.map wrapEventReadResult
+
+  /// ReadStreamEventsBackwardAsync
+  let internal readBackRaw (c : Connection) streamId start count resolveLinks userCredentials =
+    c.ReadStreamEventsBackward(streamId, start, count, resolveLinks, userCredentials)
+    |> Async.AwaitTask
+
+  /// ReadStreamEventsBackwardAsync
+  let readBack (c : Connection) streamId start count resolveLinks userCredentials =
+    readBackRaw c streamId start count resolveLinks userCredentials
+    |> Async.map wrapStreamEventsSlice
+
+  /// ReadStreamEventsForwardAsync
+  /// <param name="start">Where to start reading, inclusive</param>
+  let internal readRaw (c : Connection) streamId start count resolveLinkTos userCredentials =
+    c.ReadStreamEventsForward(streamId, start, count, resolveLinkTos, userCredentials)
+    |> Async.AwaitTask
+
+  /// ReadStreamEventsForwardAsync
+  /// <param name="start">Where to start reading, inclusive</param>
+  let read (c : Connection) streamId start count resolveLinkTos userCredentials =
+    readRaw c streamId start count resolveLinkTos userCredentials
+    |> Async.map wrapStreamEventsSlice
+
+  /// SetStreamMetadataAsync
+  let setMetadata (c : Connection) streamId expectedVersion metadata userCredentials =
+    c.SetStreamMetadata(streamId, expectedVersion, metadata, userCredentials)
+    |> awaitTask
+
+  let setSystemSettings (c : Connection) settings userCredentials =
+    c.SetSystemSettings(settings, userCredentials)
+    |> awaitTask
+
+  /// StartTransactionAsync
+  let startTx streamId expectedVersion userCredentials (c : Connection) =
+    c.StartTransaction(streamId, expectedVersion, userCredentials)
+    |> Async.AwaitTask
+    |> canThrowWrongExpectedVersion
+
+  let updatePersistent (c : Connection) streamId groupName settings userCredentials =
+    c.UpdatePersistentSubscription(streamId, groupName, settings, userCredentials)
+    |> awaitTask
 
 module ConnectionSettings =
   // BUILDING CONNECTION
@@ -1377,7 +1574,7 @@ module Projections =
     | e ->
       raise (Exception("exception in wait_for_init", origErr))
     }
- 
+
   let ensureContinuous ctx name query =
     let pm = mkManager ctx
     async {

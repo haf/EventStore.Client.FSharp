@@ -1,47 +1,5 @@
 namespace EventStore.ClientAPI
 
-// https://github.com/EventStore/EventStore/wiki/Writing-Events-%28.NET-API%29
-
-/// The specific event version to read as detailed on ReadEventAsync
-type EventVersion =
-  | SpecificEvent of uint32
-  /// -1 - read the last written event
-  | LastInStream
-
-/// The version at which we currently expect the stream to be in order that an
-/// optimistic concurrency check can be performed. This should either be a 
-/// positive integer, or one of the constants ExpectedVersion.NoStream, 
-/// ExpectedVersion.EmptyStream, or to disable the check, ExpectedVersion.Any.
-/// The level of idempotence guarantee depends on whether or not the optimistic 
-/// concurrency check is not disabled during writing (by passing ExpectedVersion.Any
-/// as the expectedVersion for the write).
-/// More information at
-/// https://github.com/EventStore/EventStore/wiki/Optimistic-Concurrency-&-Idempotence
-type ExpectedVersionUnion =
-  /// To be used when you don't have an empty stream nor when you have no stream,
-  /// i.e. to be used when you have previously saved events to the stream and hence
-  /// know its version.
-  | Specific of uint32
-  /// Use this if you create the stream when you start appending to it.
-  | NoStream
-  /// Use this for streams that have been created explicitly
-  /// before appending to them (or deleting them)
-  | EmptyStream
-  /// Disable concurrency checks and just look at the commit id and
-  /// data.
-  | Any
-
-/// The strategy to use when encountering links in the 
-/// event stream.
-type ResolveLinksStrategy =
-  | ResolveLinks
-  | DontResolveLinks
-
-type StreamCheckpoint =
-  | StreamStart
-  /// Exclusive event number to subscribe from. I.e. you will not receive this event.
-  | StreamEventNumber of uint32
-
 module AsyncHelpers =
 
   open System
@@ -65,6 +23,51 @@ module AsyncHelpers =
 
   type Microsoft.FSharp.Control.Async with
     static member AwaitTask t = awaitTask t
+
+[<AutoOpen>]
+module Primitives =
+
+  // https://github.com/EventStore/EventStore/wiki/Writing-Events-%28.NET-API%29
+
+  /// The specific event version to read as detailed on ReadEventAsync
+  type EventVersion =
+    | SpecificEvent of uint32
+    /// -1 - read the last written event
+    | LastInStream
+
+  /// The version at which we currently expect the stream to be in order that an
+  /// optimistic concurrency check can be performed. This should either be a 
+  /// positive integer, or one of the constants ExpectedVersion.NoStream, 
+  /// ExpectedVersion.EmptyStream, or to disable the check, ExpectedVersion.Any.
+  /// The level of idempotence guarantee depends on whether or not the optimistic 
+  /// concurrency check is not disabled during writing (by passing ExpectedVersion.Any
+  /// as the expectedVersion for the write).
+  /// More information at
+  /// https://github.com/EventStore/EventStore/wiki/Optimistic-Concurrency-&-Idempotence
+  type ExpectedVersionUnion =
+    /// To be used when you don't have an empty stream nor when you have no stream,
+    /// i.e. to be used when you have previously saved events to the stream and hence
+    /// know its version.
+    | Specific of uint32
+    /// Use this if you create the stream when you start appending to it.
+    | NoStream
+    /// Use this for streams that have been created explicitly
+    /// before appending to them (or deleting them)
+    | EmptyStream
+    /// Disable concurrency checks and just look at the commit id and
+    /// data.
+    | Any
+
+  /// The strategy to use when encountering links in the 
+  /// event stream.
+  type ResolveLinksStrategy =
+    | ResolveLinks
+    | DontResolveLinks
+
+  type StreamCheckpoint =
+    | StreamStart
+    /// Exclusive event number to subscribe from. I.e. you will not receive this event.
+    | StreamEventNumber of uint32
 
 module internal Helpers =
 

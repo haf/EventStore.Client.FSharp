@@ -10,7 +10,7 @@ that accompanies the assembly.
 ## API
 
 Usage `open EventStore.Client`. If using `Repo` and `Aggregate`, you should use
-the nuget `Intelliplan.JsonNet` to get access to `Serialisation.serialise` and
+the nuget `Newtonsoft.Json.FSharp` to get access to `Serialisation.serialise` and
 `Serialisation.deserialise`, which are the two serialisation functions that work
 well.
 
@@ -63,10 +63,6 @@ Anyone is welcome to answer.
 
 ## Roadmap
 
- - [x] API-parity with v3.0
+ - [ ] Release for 3.1.0 together with helper CQRS lib (moving higher-level
+   patterns there)
  - [ ] Snapshot helpers for Aggregates
- - [x] Fix depdencies for nuget:
-   * FSharp.Core.3
-   * Newtonsoft.Json
-   * EventStore.Client
-   * FSharpX.Core

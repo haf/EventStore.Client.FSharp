@@ -19,7 +19,6 @@ open EventStore.ClientAPI.AsyncHelpers
 open EventStore.ClientAPI.SystemData
 open EventStore.ClientAPI.Common.Log
 
-open Newtonsoft.Json.FSharp
 
 let run_t (t : Task) = t |> Async.AwaitTask |> Async.RunSynchronously
 
@@ -34,10 +33,6 @@ let roundtrip_tests =
   let eventStoreImpl = withEmbeddedEs
 
   testList "read your writes" [
-    testCase "assumption: expected URN" <| fun _ ->
-      let n = TypeNaming.nameObj MetAYakAndShavedIt
-      Assert.Equal("expected name", "urn:Tests:LifeOfAProgrammer_Evt|MetAYakAndShavedIt", n)
-
 //    testCase "initialisation: can add read model" <| fun _ ->
 //      eventstore_impl <| fun _ ->
 //        Projections.wait_for_init proj_ctx <| fun _ -> async {

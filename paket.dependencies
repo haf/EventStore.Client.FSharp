@@ -6,7 +6,6 @@ nuget EventStore.Client.PreRelease
 nuget FSharp.Core
 nuget Fuchu
 nuget Logary.Adapters.EventStore ~> 3.0.3
-nuget Newtonsoft.Json
 nuget NuGet.CommandLine
 nuget protobuf-net
 nuget NLog

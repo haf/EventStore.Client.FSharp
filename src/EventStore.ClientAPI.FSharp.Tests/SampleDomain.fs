@@ -1,7 +1,6 @@
 ﻿module Tests.LifeOfAProgrammer
 
 open EventStore.ClientAPI
-open Newtonsoft.Json.FSharp
 
 type Cmd =
   | CodeLikeHell

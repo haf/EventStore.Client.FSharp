@@ -7,6 +7,8 @@ This is a project that aims to bring a smooth F# API to your codes.
 Currently, has almost APIs mapped out. Documentation is in the form of XML-docs
 that accompanies the assembly.
 
+v4.0 is not API compatibible with v3.x, but otherwise works well with ES v3.x.
+
 ## API
 
 Usage `open EventStore.Client`. If using `Repo` and `Aggregate`, you should use

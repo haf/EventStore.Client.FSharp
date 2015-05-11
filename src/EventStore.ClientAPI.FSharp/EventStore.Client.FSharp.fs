@@ -1522,8 +1522,11 @@ module Projections =
         pm.GetStatusAsync(name, ctx.creds)
         |> Async.AwaitTask
         |> handleHttpCodes ctx.logger
-      return res |> Option.map (Json.parse 
-        >> (Json.deserialize : _ -> Status))
+      try
+        return res |> Option.map (Json.parse >> (Json.deserialize : _ -> Status))
+      with
+      | :? System.OverflowException as e ->
+        return failwithf "res: %s" (if res.IsSome then res.Value else "-")
     }
 
   let listAll ctx =
@@ -1575,7 +1578,7 @@ module Projections =
     | e when e.InnerException <> null ->
       return! onError ctx f origErr (e.InnerException)
     | e ->
-      raise (Exception("exception in wait_for_init", origErr))
+      raise (Exception("exception in waitForInit", origErr))
     }
 
   let ensureContinuous ctx name query =
@@ -1585,10 +1588,10 @@ module Projections =
       let! status = getStatus ctx name
       match status with
       | None -> 
-        ctx.logger.Debug "calling create_continuous from 404 case"
+        ctx.logger.Debug "calling ensureContinuous from 404 case"
         do! create_continuous ctx name query
       | Some status when status.status <> "Running" ->
-        ctx.logger.Debug "calling create_continuous from not Running case"
+        ctx.logger.Debug "calling ensureContinuous from not Running case"
         do! create_continuous ctx name query
       | other ->
         ctx.logger.Debug (sprintf "got %O back" other)

@@ -1597,3 +1597,33 @@ module Projections =
         ctx.logger.Debug (sprintf "got %O back" other)
         return ()
     }
+
+/// A connection wrapper that ensures the connection is connected when it's being
+/// used.
+type ConnectionWrapper(esLogger, tcpEndpoint) =
+  let mutable connected = false
+
+  let connection =
+    ConnectionSettings.configureStart ()
+    |> ConnectionSettings.useCustomLogger esLogger
+    |> ConnectionSettings.keepReconnecting
+    |> ConnectionSettings.configureEnd tcpEndpoint
+
+  let ensureConnected () = async {
+    if not connected then
+      do! Conn.connect connection
+      connected <- true
+    }
+
+  member x.Execute<'a> (f : Connection -> Async<'a>) = async {
+    do! ensureConnected ()
+    return! f connection
+  }
+
+  member x.Connection =
+    ensureConnected () |> Async.RunSynchronously
+    connection
+
+  interface IDisposable with
+    member x.Dispose() =
+      Conn.close connection

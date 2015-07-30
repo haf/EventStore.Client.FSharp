@@ -51,7 +51,7 @@ let withEmbeddedEs f =
     node.MainBus.Subscribe(
       new AdHocHandler<SystemMessage.BecomeShutdown>(
         fun m -> stopped.Set() |> ignore))
-    node.Stop()
+    node.Stop() |> ignore
     if not (stopped.WaitOne(20000)) then
       Tests.failtest "couldn't stop ES within 20000 ms"
     else
